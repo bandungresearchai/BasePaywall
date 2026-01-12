@@ -1,0 +1,23 @@
+# Compiler output
+out/
+cache/
+
+# Build artifacts
+artifacts/
+
+# Broadcast files (deployment transactions)
+broadcast/
+
+# Environment files
+.env
+!.env.example
+
+# Dependencies
+lib/
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store

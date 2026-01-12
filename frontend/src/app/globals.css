@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 255, 255, 255;
+  --background-start-rgb: 10, 11, 13;
+  --background-end-rgb: 10, 11, 13;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+  min-height: 100vh;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1b1f;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #0052FF;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #0066FF;
+}
+
+/* OnchainKit overrides */
+.ock-font-family {
+  font-family: inherit !important;
+}
+
+/* Glow effect for premium content */
+.glow-effect {
+  box-shadow: 0 0 40px rgba(0, 82, 255, 0.3);
+}
+
+/* Locked content overlay */
+.locked-overlay {
+  backdrop-filter: blur(8px);
+}
