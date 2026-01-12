@@ -28,7 +28,8 @@ Built with BasePaywall - HTTP 402 on Base L2
 `;
 
 // x402 protected endpoint
-async function handler(request: NextRequest): Promise<NextResponse> {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function handler(_request: NextRequest): Promise<NextResponse> {
   return NextResponse.json({
     success: true,
     content: PROTECTED_CONTENT,
