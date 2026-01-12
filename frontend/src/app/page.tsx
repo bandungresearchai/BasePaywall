@@ -2,6 +2,7 @@
 
 import { WalletConnect } from '@/components/WalletConnect';
 import { PaywallContent } from '@/components/PaywallContent';
+import { X402ContentDemo } from '@/components/X402Demo';
 import { useAccount } from 'wagmi';
 
 function BaseLogo() {
@@ -70,9 +71,22 @@ export default function Home() {
       </section>
 
       {/* Paywall Content Section */}
-      <section className="pb-20 px-4">
+      <section className="pb-12 px-4">
         <div className="max-w-2xl mx-auto">
           <PaywallContent />
+        </div>
+      </section>
+
+      {/* x402 Protocol Demo Section */}
+      <section className="pb-20 px-4">
+        <div className="max-w-2xl mx-auto space-y-4">
+          <div className="text-center">
+            <span className="inline-flex items-center space-x-2 bg-purple-500/10 border border-purple-500/30 rounded-full px-4 py-2 text-sm text-purple-400">
+              <span>⚡</span>
+              <span>x402 Protocol Integration</span>
+            </span>
+          </div>
+          <X402ContentDemo />
         </div>
       </section>
 
