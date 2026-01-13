@@ -4,8 +4,30 @@ import { useAccount, useReadContract, useWriteContract, useWaitForTransactionRec
 import { BASEPAYWALL_ABI, BASEPAYWALL_ADDRESS, PRICE_WEI } from '@/config/contract';
 import { useEffect, useState } from 'react';
 
+export function useContractOwner() {
+  const { address, isConnected } = useAccount();
+
+  const { data: owner, isLoading } = useReadContract({
+    address: BASEPAYWALL_ADDRESS,
+    abi: BASEPAYWALL_ABI,
+    functionName: 'owner',
+    query: {
+      enabled: isConnected,
+    },
+  });
+
+  const isOwner = address && owner ? address.toLowerCase() === (owner as string).toLowerCase() : false;
+
+  return {
+    owner: owner as `0x${string}` | undefined,
+    isOwner,
+    isLoading,
+  };
+}
+
 export function usePaywallStatus() {
   const { address, isConnected } = useAccount();
+  const { isOwner } = useContractOwner();
 
   const {
     data: hasPaid,
@@ -21,8 +43,13 @@ export function usePaywallStatus() {
     },
   });
 
+  // Owner always has access
+  const hasAccess = isOwner || (hasPaid ?? false);
+
   return {
     hasPaid: hasPaid ?? false,
+    hasAccess,
+    isOwner,
     isCheckingStatus,
     refetchStatus,
     isConnected,

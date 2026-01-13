@@ -67,7 +67,7 @@ function LoadingSpinner() {
 }
 
 export function PaywallContent() {
-  const { hasPaid, isCheckingStatus, isConnected, refetchStatus } = usePaywallStatus();
+  const { hasAccess, isOwner, isCheckingStatus, isConnected, refetchStatus } = usePaywallStatus();
   const { pay, txStatus, error, isPending, isConfirming, isSuccess, reset, hash } = usePaywallPayment();
   const { content, isLoading: isLoadingContent } = usePaywallContent();
   const { priceInEth } = usePaywallPrice();
@@ -107,12 +107,18 @@ export function PaywallContent() {
     );
   }
 
-  if (hasPaid) {
+  // Show unlocked content for owner or users who have paid
+  if (hasAccess) {
     return (
       <div className="bg-gradient-to-br from-green-900/30 to-blue-900/30 rounded-2xl p-8 border border-green-500/30 glow-effect">
         <div className="flex flex-col items-center text-center space-y-4">
           <UnlockIcon />
           <h2 className="text-2xl font-bold text-white">🎉 Content Unlocked!</h2>
+          {isOwner && (
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-500/20 text-purple-300 border border-purple-500/30">
+              👑 Contract Owner
+            </span>
+          )}
           <div className="bg-gray-900/80 rounded-xl p-6 w-full mt-4">
             {isLoadingContent ? (
               <div className="flex items-center justify-center">
@@ -125,7 +131,9 @@ export function PaywallContent() {
             )}
           </div>
           <p className="text-sm text-gray-500 mt-4">
-            Thank you for your payment! You now have permanent access.
+            {isOwner 
+              ? 'As the contract owner, you have permanent access to all content.'
+              : 'Thank you for your payment! You now have permanent access.'}
           </p>
         </div>
       </div>
