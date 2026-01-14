@@ -1,11 +1,12 @@
 'use client';
 
-import { usePaywallStatus, usePaywallPayment, usePaywallPrice, DEFAULT_CONTENT_ID } from '@/hooks/usePaywall';
+import { useContentAccess, useUnlockContent, useContent } from '@/hooks/usePaywallV2';
 import { useExplorer, useNetwork } from '@/hooks/useNetwork';
 import { useNetworkGuard } from '@/components/NetworkGuard';
+import { useAccount } from 'wagmi';
 
-interface PaywallContentProps {
-  contentId?: bigint;
+interface PaywallContentV2Props {
+  contentId: bigint;
   title?: string;
   description?: string;
   unlockedContent?: React.ReactNode;
@@ -74,9 +75,9 @@ function LoadingSpinner() {
   );
 }
 
-function TransactionReceipt({ hash, priceInEth }: { hash: string; priceInEth: number }) {
+function TransactionReceipt({ hash, priceEth }: { hash: string; priceEth: string }) {
   const { getTransactionUrl } = useExplorer();
-  
+
   return (
     <div className="bg-green-900/30 border border-green-500/30 rounded-xl p-4 w-full">
       <div className="flex items-center space-x-2 mb-3">
@@ -86,7 +87,7 @@ function TransactionReceipt({ hash, priceInEth }: { hash: string; priceInEth: nu
       <div className="space-y-2 text-sm">
         <div className="flex justify-between text-gray-400">
           <span>Amount Paid:</span>
-          <span className="text-white">{priceInEth} ETH</span>
+          <span className="text-white">{priceEth} ETH</span>
         </div>
         <div className="flex justify-between text-gray-400">
           <span>Transaction:</span>
@@ -114,7 +115,7 @@ function TransactionReceipt({ hash, priceInEth }: { hash: string; priceInEth: nu
 
 function WrongNetworkBanner() {
   const { switchToDefault, isSwitching, defaultChain } = useNetwork();
-  
+
   return (
     <div className="bg-red-900/30 border border-red-500/50 rounded-xl p-4 w-full mb-4">
       <div className="flex items-center justify-between">
@@ -134,17 +135,58 @@ function WrongNetworkBanner() {
   );
 }
 
-export function PaywallContent({ 
-  contentId = DEFAULT_CONTENT_ID,
+function ContentNotFound({ contentId }: { contentId: bigint }) {
+  return (
+    <div className="bg-gray-900/50 rounded-2xl p-8 border border-gray-800">
+      <div className="flex flex-col items-center text-center space-y-4">
+        <span className="text-4xl">🔍</span>
+        <h2 className="text-xl font-bold text-white">Content Not Found</h2>
+        <p className="text-gray-400">
+          Content #{contentId.toString()} does not exist or has not been created yet.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function ContentDisabled({ contentId }: { contentId: bigint }) {
+  return (
+    <div className="bg-gray-900/50 rounded-2xl p-8 border border-red-500/30">
+      <div className="flex flex-col items-center text-center space-y-4">
+        <span className="text-4xl">🚫</span>
+        <h2 className="text-xl font-bold text-white">Content Unavailable</h2>
+        <p className="text-gray-400">
+          Content #{contentId.toString()} has been disabled by the creator.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+export function PaywallContentV2({
+  contentId,
   title = 'Premium Content',
   description = 'Unlock exclusive content with a one-time payment. No subscriptions, no recurring fees.',
   unlockedContent,
-}: PaywallContentProps) {
-  const { hasAccess, isOwner, isCheckingStatus, isConnected } = usePaywallStatus(contentId);
-  const { pay, txStatus, error, isPending, reset, hash, canPay, isTransactionPending } = usePaywallPayment(contentId);
-  const { priceInEth } = usePaywallPrice(contentId);
+}: PaywallContentV2Props) {
+  const { isConnected, address } = useAccount();
+  const { creator, priceEth, enabled, isLoading: isLoadingContent } = useContent(contentId);
+  const { hasAccess, isLoading: isCheckingAccess } = useContentAccess(contentId);
+  const {
+    unlock,
+    txStatus,
+    error,
+    isPending,
+    isConfirming,
+    hash,
+    reset,
+  } = useUnlockContent(contentId);
   const { shouldBlockTransaction, isWrongNetwork } = useNetworkGuard();
 
+  // Check if user is the creator (auto-access)
+  const isCreator = address && creator ? address.toLowerCase() === creator.toLowerCase() : false;
+
+  // Not connected state
   if (!isConnected) {
     return (
       <div className="bg-gray-900/50 rounded-2xl p-8 border border-gray-800">
@@ -159,27 +201,38 @@ export function PaywallContent({
     );
   }
 
-  if (isCheckingStatus) {
+  // Loading state
+  if (isLoadingContent || isCheckingAccess) {
     return (
       <div className="bg-gray-900/50 rounded-2xl p-8 border border-gray-800">
         <div className="flex flex-col items-center text-center space-y-4">
           <LoadingSpinner />
-          <p className="text-gray-400">Checking payment status...</p>
+          <p className="text-gray-400">Checking content status...</p>
         </div>
       </div>
     );
   }
 
-  // Show unlocked content for owner or users who have paid
+  // Content not found
+  if (!creator || creator === '0x0000000000000000000000000000000000000000') {
+    return <ContentNotFound contentId={contentId} />;
+  }
+
+  // Content disabled (unless user already has access or is creator)
+  if (!enabled && !hasAccess && !isCreator) {
+    return <ContentDisabled contentId={contentId} />;
+  }
+
+  // User has access (paid or is creator)
   if (hasAccess) {
     return (
       <div className="bg-gradient-to-br from-green-900/30 to-blue-900/30 rounded-2xl p-8 border border-green-500/30 glow-effect">
         <div className="flex flex-col items-center text-center space-y-4">
           <UnlockIcon />
           <h2 className="text-2xl font-bold text-white">🎉 Content Unlocked!</h2>
-          {isOwner && (
+          {isCreator && (
             <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-500/20 text-purple-300 border border-purple-500/30">
-              👑 Contract Owner
+              👩‍🎨 Content Creator
             </span>
           )}
           <div className="bg-gray-900/80 rounded-xl p-6 w-full mt-4">
@@ -187,13 +240,13 @@ export function PaywallContent({
               unlockedContent
             ) : (
               <p className="text-gray-200 text-lg leading-relaxed">
-                Congratulations! You have unlocked the premium content #{contentId.toString()}.
+                Congratulations! You have unlocked premium content #{contentId.toString()}.
               </p>
             )}
           </div>
           <p className="text-sm text-gray-500 mt-4">
-            {isOwner 
-              ? 'As the contract owner, you have permanent access to all content.'
+            {isCreator
+              ? 'As the content creator, you have permanent access.'
               : 'Thank you for your payment! You now have permanent access.'}
           </p>
         </div>
@@ -201,15 +254,14 @@ export function PaywallContent({
     );
   }
 
+  // Paywall state - user needs to pay
   return (
     <div className="bg-gray-900/50 rounded-2xl p-8 border border-gray-800">
       <div className="flex flex-col items-center text-center space-y-6">
         <LockIcon />
         <div className="space-y-2">
           <h2 className="text-2xl font-bold text-white">{title}</h2>
-          <p className="text-gray-400 max-w-md">
-            {description}
-          </p>
+          <p className="text-gray-400 max-w-md">{description}</p>
         </div>
 
         {/* Network warning */}
@@ -225,7 +277,7 @@ export function PaywallContent({
           </div>
           <div className="absolute inset-0 flex items-center justify-center">
             <span className="bg-gray-900/90 px-4 py-2 rounded-full text-sm text-gray-300 border border-gray-700">
-              🔒 Locked Content
+              🔒 Content #{contentId.toString()}
             </span>
           </div>
         </div>
@@ -234,7 +286,7 @@ export function PaywallContent({
         <div className="bg-base-blue/10 rounded-xl px-6 py-4 border border-base-blue/30">
           <p className="text-sm text-gray-400">One-time payment</p>
           <p className="text-3xl font-bold text-white">
-            {priceInEth} <span className="text-base-blue">ETH</span>
+            {priceEth} <span className="text-base-blue">ETH</span>
           </p>
           <p className="text-xs text-gray-500 mt-1">on Base Network</p>
         </div>
@@ -255,7 +307,7 @@ export function PaywallContent({
         )}
 
         {txStatus === 'success' && hash && (
-          <TransactionReceipt hash={hash} priceInEth={priceInEth} />
+          <TransactionReceipt hash={hash} priceEth={priceEth} />
         )}
 
         {txStatus === 'error' && (
@@ -277,23 +329,21 @@ export function PaywallContent({
         {/* Pay button */}
         {txStatus !== 'success' && (
           <button
-            onClick={pay}
-            disabled={!canPay || shouldBlockTransaction || isTransactionPending}
+            onClick={unlock}
+            disabled={shouldBlockTransaction || isPending || isConfirming || hasAccess}
             className="w-full bg-base-blue hover:bg-blue-600 disabled:bg-gray-700 disabled:cursor-not-allowed text-white font-semibold py-4 px-8 rounded-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center space-x-2"
           >
-            {isTransactionPending ? (
+            {isPending || isConfirming ? (
               <>
                 <LoadingSpinner />
                 <span>{isPending ? 'Confirm in Wallet' : 'Processing...'}</span>
               </>
             ) : shouldBlockTransaction ? (
               <span>Switch Network to Pay</span>
-            ) : !canPay ? (
-              <span>Already Unlocked</span>
             ) : (
               <>
                 <span>🔓</span>
-                <span>Unlock Content for {priceInEth} ETH</span>
+                <span>Unlock Content for {priceEth} ETH</span>
               </>
             )}
           </button>

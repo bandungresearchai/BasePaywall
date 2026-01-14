@@ -3,7 +3,11 @@
 import { WalletConnect } from '@/components/WalletConnect';
 import { PaywallContent } from '@/components/PaywallContent';
 import { X402ContentDemo } from '@/components/X402Demo';
+import { NetworkGuard } from '@/components/NetworkGuard';
+import { CreatorDashboard } from '@/components/CreatorDashboard';
+import { UserUnlockedContent } from '@/components/UserUnlockedContent';
 import { useAccount } from 'wagmi';
+import { useContractOwner } from '@/hooks/usePaywall';
 
 function BaseLogo() {
   return (
@@ -35,6 +39,37 @@ function NetworkBadge() {
   );
 }
 
+function WalletAddress() {
+  const { address, isConnected } = useAccount();
+  
+  if (!isConnected || !address) return null;
+  
+  return (
+    <span className="text-gray-400 text-sm font-mono hidden md:inline">
+      {address.slice(0, 6)}...{address.slice(-4)}
+    </span>
+  );
+}
+
+function DashboardSection() {
+  const { isOwner } = useContractOwner();
+  const { isConnected } = useAccount();
+
+  if (!isConnected) return null;
+
+  return (
+    <section className="pb-12 px-4">
+      <div className="max-w-4xl mx-auto space-y-8">
+        {/* Creator Dashboard - only shown to owner */}
+        {isOwner && <CreatorDashboard />}
+        
+        {/* User's Unlocked Content */}
+        <UserUnlockedContent />
+      </div>
+    </section>
+  );
+}
+
 export default function Home() {
   return (
     <main className="min-h-screen bg-base-dark">
@@ -46,6 +81,7 @@ export default function Home() {
             <h1 className="text-xl font-bold text-white">BasePaywall</h1>
           </div>
           <div className="flex items-center space-x-4">
+            <WalletAddress />
             <NetworkBadge />
             <WalletConnect />
           </div>
@@ -70,12 +106,17 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Paywall Content Section */}
+      {/* Paywall Content Section - Wrapped with NetworkGuard */}
       <section className="pb-12 px-4">
         <div className="max-w-2xl mx-auto">
-          <PaywallContent />
+          <NetworkGuard>
+            <PaywallContent />
+          </NetworkGuard>
         </div>
       </section>
+
+      {/* Dashboard Section */}
+      <DashboardSection />
 
       {/* x402 Protocol Demo Section */}
       <section className="pb-20 px-4">

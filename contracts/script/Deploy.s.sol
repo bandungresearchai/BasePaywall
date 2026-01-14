@@ -19,7 +19,7 @@ contract DeployBasePaywall is Script {
         vm.stopBroadcast();
         
         console.log("BasePaywall deployed at:", address(paywall));
-        console.log("Price:", paywall.PRICE());
+        console.log("Default Price:", paywall.DEFAULT_PRICE());
         
         return paywall;
     }
