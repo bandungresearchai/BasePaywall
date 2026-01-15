@@ -7,6 +7,23 @@ import { useEffect, useState, useCallback } from 'react';
 // ============ Platform Hooks ============
 
 /**
+ * Hook to get the next content ID (useful to know how many contents exist)
+ */
+export function useNextContentId() {
+  const { data, isLoading, refetch } = useReadContract({
+    address: BASEPAYWALL_V2_ADDRESS,
+    abi: BASEPAYWALL_V2_ABI,
+    functionName: 'nextContentId',
+  });
+
+  return {
+    nextContentId: data ? (data as bigint) : BigInt(1),
+    isLoading,
+    refetch,
+  };
+}
+
+/**
  * Hook to check if connected wallet is the platform owner
  */
 export function usePlatformOwner() {

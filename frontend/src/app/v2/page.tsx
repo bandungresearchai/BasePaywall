@@ -7,7 +7,7 @@ import { CreatorDashboardV2 } from '@/components/CreatorDashboardV2';
 import { UserUnlockedContentV2 } from '@/components/UserUnlockedContentV2';
 import { PlatformAdminV2 } from '@/components/PlatformAdminV2';
 import { useAccount } from 'wagmi';
-import { usePlatformStats } from '@/hooks/usePaywallV2';
+import { usePlatformStats, useCreator, useNextContentId } from '@/hooks/usePaywallV2';
 import { useState } from 'react';
 
 function BaseLogo() {
@@ -66,18 +66,89 @@ function PlatformStats() {
   );
 }
 
+function QuickStartGuide() {
+  const { isConnected } = useAccount();
+  const { isRegistered } = useCreator();
+  const { nextContentId } = useNextContentId();
+  const hasContent = nextContentId > 1;
+
+  if (!isConnected) {
+    return (
+      <div className="bg-yellow-900/20 border border-yellow-500/30 rounded-xl p-6 mb-6">
+        <h3 className="text-lg font-bold text-yellow-400 mb-3">🚀 Quick Start Guide</h3>
+        <ol className="list-decimal list-inside space-y-2 text-gray-300 text-sm">
+          <li><strong>Connect your wallet</strong> using the button above</li>
+          <li>Register as a creator in the Creator Dashboard</li>
+          <li>Create content with a price</li>
+          <li>Use a different wallet to test the unlock flow</li>
+        </ol>
+      </div>
+    );
+  }
+
+  const steps = [
+    { done: isConnected, text: 'Connect wallet' },
+    { done: isRegistered, text: 'Register as creator' },
+    { done: hasContent, text: 'Create content' },
+  ];
+
+  const completedSteps = steps.filter(s => s.done).length;
+  const allDone = completedSteps === steps.length;
+
+  if (allDone) {
+    return (
+      <div className="bg-green-900/20 border border-green-500/30 rounded-xl p-6 mb-6">
+        <h3 className="text-lg font-bold text-green-400 mb-3">✅ Setup Complete!</h3>
+        <p className="text-gray-300 text-sm">
+          You have created content. To test the <strong>unlock flow</strong>, use a different wallet 
+          to pay for your content. The creator wallet automatically has access.
+        </p>
+        <p className="text-gray-400 text-sm mt-2">
+          Content IDs available: 1 to {(nextContentId - BigInt(1)).toString()}
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-blue-900/20 border border-blue-500/30 rounded-xl p-6 mb-6">
+      <h3 className="text-lg font-bold text-blue-400 mb-3">
+        🚀 Getting Started ({completedSteps}/{steps.length})
+      </h3>
+      <ol className="list-decimal list-inside space-y-2 text-sm">
+        {steps.map((step, i) => (
+          <li key={i} className={step.done ? 'text-green-400 line-through' : 'text-gray-300'}>
+            {step.text} {step.done && '✓'}
+          </li>
+        ))}
+      </ol>
+      {!isRegistered && (
+        <p className="text-gray-400 text-sm mt-4">
+          👇 Scroll down to the <strong>Creator Dashboard</strong> to register and create content.
+        </p>
+      )}
+    </div>
+  );
+}
+
 function ContentBrowser() {
   const [contentId, setContentId] = useState<string>('1');
+  const { nextContentId } = useNextContentId();
+  const hasContent = nextContentId > 1;
   const currentContentId = BigInt(contentId || '1');
 
   return (
     <div className="space-y-4">
+      {/* Quick Start Guide */}
+      <QuickStartGuide />
+
       {/* Content ID Selector */}
       <div className="flex items-center justify-center space-x-4">
         <label className="text-gray-400 text-sm">Content ID:</label>
         <input
           type="number"
           min="1"
+          max={hasContent ? Number(nextContentId - BigInt(1)) : 1}
           value={contentId}
           onChange={(e) => setContentId(e.target.value)}
           className="w-24 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-center focus:outline-none focus:border-base-blue"
@@ -86,16 +157,23 @@ function ContentBrowser() {
           <button
             onClick={() => setContentId(String(Math.max(1, Number(contentId) - 1)))}
             className="bg-gray-800 hover:bg-gray-700 text-white px-3 py-2 rounded-lg"
+            disabled={Number(contentId) <= 1}
           >
             ←
           </button>
           <button
             onClick={() => setContentId(String(Number(contentId) + 1))}
             className="bg-gray-800 hover:bg-gray-700 text-white px-3 py-2 rounded-lg"
+            disabled={!hasContent || Number(contentId) >= Number(nextContentId - BigInt(1))}
           >
             →
           </button>
         </div>
+        {hasContent && (
+          <span className="text-gray-500 text-sm">
+            (1-{(nextContentId - BigInt(1)).toString()} available)
+          </span>
+        )}
       </div>
 
       {/* Paywall Content */}
