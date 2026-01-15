@@ -7,7 +7,7 @@ function UnlockedContentItem({ contentId }: { contentId: bigint }) {
   const { priceInEth } = usePaywallPrice(contentId);
 
   return (
-    <div className="flex items-center justify-between bg-gray-800/50 rounded-xl p-4 border border-gray-700">
+    <div className="card flex items-center justify-between p-4">
       <div className="flex items-center space-x-3">
         <div className="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center">
           <span className="text-green-400">✓</span>
@@ -58,7 +58,7 @@ export function UserUnlockedContent() {
 
   if (!isConnected) {
     return (
-      <div className="bg-gray-900/50 rounded-2xl p-6 border border-gray-800">
+      <div className="card p-6">
         <h3 className="text-lg font-semibold text-white mb-4">My Unlocked Content</h3>
         <p className="text-gray-400 text-center py-4">Connect wallet to see your unlocked content</p>
       </div>
@@ -66,7 +66,7 @@ export function UserUnlockedContent() {
   }
 
   return (
-    <div className="bg-gray-900/50 rounded-2xl p-6 border border-gray-800">
+    <div className="card p-6">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-white">My Unlocked Content</h3>
         {unlockCount > 0 && (

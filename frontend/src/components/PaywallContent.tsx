@@ -147,7 +147,7 @@ export function PaywallContent({
 
   if (!isConnected) {
     return (
-      <div className="bg-gray-900/50 rounded-2xl p-8 border border-gray-800">
+      <div className="card p-8">
         <div className="flex flex-col items-center text-center space-y-4">
           <LockIcon />
           <h2 className="text-2xl font-bold text-white">{title} Locked</h2>
@@ -161,7 +161,7 @@ export function PaywallContent({
 
   if (isCheckingStatus) {
     return (
-      <div className="bg-gray-900/50 rounded-2xl p-8 border border-gray-800">
+      <div className="card p-8">
         <div className="flex flex-col items-center text-center space-y-4">
           <LoadingSpinner />
           <p className="text-gray-400">Checking payment status...</p>
@@ -173,7 +173,7 @@ export function PaywallContent({
   // Show unlocked content for owner or users who have paid
   if (hasAccess) {
     return (
-      <div className="bg-gradient-to-br from-green-900/30 to-blue-900/30 rounded-2xl p-8 border border-green-500/30 glow-effect">
+      <div className="card glow-effect bg-gradient-to-br from-green-900/10 to-blue-900/10 p-8">
         <div className="flex flex-col items-center text-center space-y-4">
           <UnlockIcon />
           <h2 className="text-2xl font-bold text-white">🎉 Content Unlocked!</h2>
@@ -182,7 +182,7 @@ export function PaywallContent({
               👑 Contract Owner
             </span>
           )}
-          <div className="bg-gray-900/80 rounded-xl p-6 w-full mt-4">
+          <div className="card bg-gray-900/80 rounded-xl p-6 w-full mt-4">
             {unlockedContent ? (
               unlockedContent
             ) : (
@@ -202,7 +202,7 @@ export function PaywallContent({
   }
 
   return (
-    <div className="bg-gray-900/50 rounded-2xl p-8 border border-gray-800">
+    <div className="card p-8">
       <div className="flex flex-col items-center text-center space-y-6">
         <LockIcon />
         <div className="space-y-2">
@@ -279,7 +279,7 @@ export function PaywallContent({
           <button
             onClick={pay}
             disabled={!canPay || shouldBlockTransaction || isTransactionPending}
-            className="w-full bg-base-blue hover:bg-blue-600 disabled:bg-gray-700 disabled:cursor-not-allowed text-white font-semibold py-4 px-8 rounded-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center space-x-2"
+            className={`btn btn-primary w-full ${shouldBlockTransaction ? 'opacity-80' : ''}`}
           >
             {isTransactionPending ? (
               <>

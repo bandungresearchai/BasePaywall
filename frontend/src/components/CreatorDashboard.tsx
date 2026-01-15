@@ -18,7 +18,7 @@ function ContentStatsCard({ contentId }: { contentId: bigint }) {
 
   if (isLoading) {
     return (
-      <div className="bg-gray-800/50 rounded-xl p-4 animate-pulse">
+      <div className="card p-4 animate-pulse">
         <div className="h-4 bg-gray-700 rounded w-1/2 mb-2" />
         <div className="h-6 bg-gray-700 rounded w-3/4" />
       </div>
@@ -26,7 +26,7 @@ function ContentStatsCard({ contentId }: { contentId: bigint }) {
   }
 
   return (
-    <div className={`bg-gray-800/50 rounded-xl p-4 border ${enabled ? 'border-gray-700' : 'border-red-500/30'}`}>
+    <div className={`card p-4 border ${enabled ? 'border-gray-700' : 'border-red-500/30'}`}>
       <div className="flex items-center justify-between mb-2">
         <span className="text-gray-400 text-sm">Content #{contentId.toString()}</span>
         <span className={`px-2 py-0.5 rounded text-xs ${enabled ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
@@ -94,7 +94,7 @@ function PriceUpdateForm() {
       <button
         type="submit"
         disabled={isPending || isConfirming}
-        className="w-full bg-base-blue hover:bg-blue-600 disabled:bg-gray-700 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 flex items-center justify-center space-x-2"
+        className="btn btn-primary w-full"
       >
         {isPending || isConfirming ? (
           <>
@@ -254,7 +254,7 @@ export function CreatorDashboard() {
   }
 
   return (
-    <div className="bg-gray-900/50 rounded-2xl p-8 border border-purple-500/30">
+    <div className="card p-8">
       <div className="flex items-center space-x-3 mb-6">
         <span className="text-2xl">👑</span>
         <h3 className="text-2xl font-bold text-white">Creator Dashboard</h3>
@@ -262,7 +262,7 @@ export function CreatorDashboard() {
 
       {/* Revenue Overview */}
       <div className="grid md:grid-cols-2 gap-6 mb-8">
-        <div className="bg-gray-800/50 rounded-xl p-6">
+        <div className="card p-6">
           <p className="text-gray-400 text-sm">Total Revenue</p>
           <p className="text-3xl font-bold text-green-400">{totalRevenueInEth.toFixed(6)} ETH</p>
         </div>
