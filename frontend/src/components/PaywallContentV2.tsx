@@ -189,7 +189,7 @@ export function PaywallContentV2({
   // Not connected state
   if (!isConnected) {
     return (
-      <div className="bg-gray-900/50 rounded-2xl p-8 border border-gray-800">
+      <div className="card p-8">
         <div className="flex flex-col items-center text-center space-y-4">
           <LockIcon />
           <h2 className="text-2xl font-bold text-white">{title} Locked</h2>
@@ -204,7 +204,7 @@ export function PaywallContentV2({
   // Loading state
   if (isLoadingContent || isCheckingAccess) {
     return (
-      <div className="bg-gray-900/50 rounded-2xl p-8 border border-gray-800">
+      <div className="card p-8">
         <div className="flex flex-col items-center text-center space-y-4">
           <LoadingSpinner />
           <p className="text-gray-400">Checking content status...</p>
@@ -226,7 +226,7 @@ export function PaywallContentV2({
   // User has access (paid or is creator)
   if (hasAccess) {
     return (
-      <div className="bg-gradient-to-br from-green-900/30 to-blue-900/30 rounded-2xl p-8 border border-green-500/30 glow-effect">
+      <div className="card glow-effect bg-gradient-to-br from-green-900/10 to-blue-900/10 p-8">
         <div className="flex flex-col items-center text-center space-y-4">
           <UnlockIcon />
           <h2 className="text-2xl font-bold text-white">🎉 Content Unlocked!</h2>
@@ -235,7 +235,7 @@ export function PaywallContentV2({
               👩‍🎨 Content Creator
             </span>
           )}
-          <div className="bg-gray-900/80 rounded-xl p-6 w-full mt-4">
+          <div className="card bg-gray-900/80 rounded-xl p-6 w-full mt-4">
             {unlockedContent ? (
               unlockedContent
             ) : (
@@ -256,7 +256,7 @@ export function PaywallContentV2({
 
   // Paywall state - user needs to pay
   return (
-    <div className="bg-gray-900/50 rounded-2xl p-8 border border-gray-800">
+    <div className="card p-8">
       <div className="flex flex-col items-center text-center space-y-6">
         <LockIcon />
         <div className="space-y-2">
@@ -286,7 +286,7 @@ export function PaywallContentV2({
         <div className="bg-base-blue/10 rounded-xl px-6 py-4 border border-base-blue/30">
           <p className="text-sm text-gray-400">One-time payment</p>
           <p className="text-3xl font-bold text-white">
-            {priceEth} <span className="text-base-blue">ETH</span>
+            {priceEth} <span className="text-primary">ETH</span>
           </p>
           <p className="text-xs text-gray-500 mt-1">on Base Network</p>
         </div>
@@ -331,7 +331,7 @@ export function PaywallContentV2({
           <button
             onClick={unlock}
             disabled={shouldBlockTransaction || isPending || isConfirming || hasAccess}
-            className="w-full bg-base-blue hover:bg-blue-600 disabled:bg-gray-700 disabled:cursor-not-allowed text-white font-semibold py-4 px-8 rounded-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center space-x-2"
+            className={`btn btn-primary w-full ${shouldBlockTransaction ? 'opacity-80' : ''}`}
           >
             {isPending || isConfirming ? (
               <>

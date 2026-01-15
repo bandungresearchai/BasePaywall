@@ -270,7 +270,7 @@ export default function HomeV2() {
   return (
     <main className="min-h-screen bg-base-dark">
       <header className="border-b border-gray-800">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between card">
           <div className="flex items-center space-x-3">
             <BaseLogo />
             <div>

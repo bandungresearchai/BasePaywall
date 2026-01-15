@@ -156,7 +156,7 @@ function CreateContentForm() {
       <button
         type="submit"
         disabled={isPending || isConfirming || !price}
-        className="w-full bg-base-blue hover:bg-blue-600 disabled:bg-gray-700 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 flex items-center justify-center space-x-2"
+        className="btn btn-primary w-full"
       >
         {isPending || isConfirming ? (
           <>
@@ -244,7 +244,7 @@ function UpdateContentForm() {
       <button
         type="submit"
         disabled={isPending || isConfirming}
-        className="w-full bg-yellow-600 hover:bg-yellow-700 disabled:bg-gray-700 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 flex items-center justify-center space-x-2"
+        className="btn w-full"
       >
         {isPending || isConfirming ? (
           <>
@@ -292,7 +292,7 @@ function WithdrawSection() {
       <button
         onClick={handleWithdraw}
         disabled={isPending || isConfirming || balance === BigInt(0)}
-        className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-700 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 flex items-center justify-center space-x-2"
+        className="btn btn-primary w-full"
       >
         {isPending || isConfirming ? (
           <>
@@ -391,7 +391,7 @@ export function CreatorDashboardV2() {
 
   if (!isConnected) {
     return (
-      <div className="bg-gray-900/50 rounded-2xl p-8 border border-gray-800">
+      <div className="card p-8">
         <div className="text-center">
           <span className="text-4xl mb-4 block">👩‍🎨</span>
           <h3 className="text-xl font-bold text-white mb-2">Creator Dashboard</h3>
@@ -403,7 +403,7 @@ export function CreatorDashboardV2() {
 
   if (isLoading) {
     return (
-      <div className="bg-gray-900/50 rounded-2xl p-8 border border-purple-500/30">
+      <div className="card p-8">
         <div className="flex items-center justify-center space-x-2">
           <LoadingSpinner />
           <span className="text-gray-400">Loading creator data...</span>
@@ -415,7 +415,7 @@ export function CreatorDashboardV2() {
   // Show registration if not a creator yet
   if (!isRegistered) {
     return (
-      <div className="bg-gray-900/50 rounded-2xl p-8 border border-gray-800">
+      <div className="card p-8">
         <div className="flex items-center space-x-3 mb-6">
           <span className="text-2xl">👩‍🎨</span>
           <h3 className="text-2xl font-bold text-white">Creator Dashboard</h3>
@@ -426,7 +426,7 @@ export function CreatorDashboardV2() {
   }
 
   return (
-    <div className="bg-gray-900/50 rounded-2xl p-8 border border-purple-500/30">
+    <div className="card p-8">
       <div className="flex items-center space-x-3 mb-6">
         <span className="text-2xl">👩‍🎨</span>
         <h3 className="text-2xl font-bold text-white">Creator Dashboard</h3>
