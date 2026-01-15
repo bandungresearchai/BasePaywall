@@ -401,8 +401,8 @@ export const BASEPAYWALL_V2_ABI = [
   },
 ] as const;
 
-// Contract address - UPDATE AFTER DEPLOYMENT
-export const BASEPAYWALL_V2_ADDRESS = '0x0000000000000000000000000000000000000000' as `0x${string}`;
+// Contract address - Base Sepolia
+export const BASEPAYWALL_V2_ADDRESS = '0x941a89281e08CD5dB0D3b2D4e7825ad7F3c2F272' as `0x${string}`;
 
 // Network configuration
 export const SUPPORTED_CHAIN_IDS = {
