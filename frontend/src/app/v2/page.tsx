@@ -224,109 +224,174 @@ function DashboardSection() {
 }
 
 export default function HomeV2() {
+  const [activeApp, setActiveApp] = useState<'home' | 'paywall' | 'creator' | 'admin' | 'unlocked' | 'analytics'>('home');
+
+  function AppSidebar({ active, onChange }: { active: string; onChange: (a: any) => void }) {
+    const item = (key: string, label: string, emoji = '•') => (
+      <button
+        onClick={() => onChange(key)}
+        className={`w-full text-left px-3 py-2 rounded-lg transition-colors flex items-center space-x-3 ${
+          active === key ? 'bg-base-blue/10 border border-base-blue/30 text-base-blue' : 'hover:bg-gray-800/30'
+        }`}
+      >
+        <span className="text-lg">{emoji}</span>
+        <span className="text-sm">{label}</span>
+      </button>
+    );
+
+    return (
+      <aside className="space-y-3">
+        <div className="px-3 py-4">
+          <div className="flex items-center space-x-3">
+            <BaseLogo />
+            <div>
+              <h3 className="text-lg font-bold text-white">BasePaywall</h3>
+              <span className="text-xs text-gray-500">Super App</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="px-3">
+          {item('home', 'Home', '🏠')}
+          {item('paywall', 'Discover Paywalls', '🔐')}
+          {item('creator', 'Creator Dashboard', '👩‍🎨')}
+          {item('unlocked', 'Your Unlocks', '🔓')}
+          {item('admin', 'Platform Admin', '🛠️')}
+          {item('analytics', 'Analytics', '📊')}
+        </div>
+
+        <div className="px-3 pt-4">
+          <NetworkBadge />
+        </div>
+      </aside>
+    );
+  }
+
   return (
     <main className="min-h-screen bg-base-dark">
-      {/* Header */}
       <header className="border-b border-gray-800">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <BaseLogo />
             <div>
-              <h1 className="text-xl font-bold text-white">BasePaywall</h1>
-              <span className="text-xs text-gray-500">v2 • Multi-tenant</span>
+              <h1 className="text-lg font-bold text-white">BasePaywall</h1>
+              <span className="text-xs text-gray-500">v2 • Super App</span>
             </div>
           </div>
           <div className="flex items-center space-x-4">
             <WalletAddress />
-            <NetworkBadge />
             <WalletConnect />
           </div>
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="py-16 px-4">
-        <div className="max-w-4xl mx-auto text-center space-y-6">
-          <div className="inline-flex items-center space-x-2 bg-base-blue/10 border border-base-blue/30 rounded-full px-4 py-2 text-sm text-base-blue">
-            <span>🔐</span>
-            <span>HTTP 402 Payment Required</span>
-          </div>
-          <h2 className="text-4xl md:text-5xl font-bold text-white leading-tight">
-            Multi-Creator Paywall
-            <span className="text-base-blue"> on Base</span>
-          </h2>
-          <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-            Create and monetize paywalled content. One-time payments,
-            permanent access, no subscriptions required.
-          </p>
-          {/* Platform Stats */}
-          <div className="pt-4">
-            <PlatformStats />
-          </div>
+      <div className="max-w-6xl mx-auto px-4 py-8 grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="md:col-span-1">
+          <AppSidebar active={activeApp} onChange={(a: any) => setActiveApp(a)} />
         </div>
-      </section>
 
-      {/* Content Browser Section */}
-      <section className="pb-12 px-4">
-        <div className="max-w-2xl mx-auto">
-          <ContentBrowser />
+        <div className="md:col-span-3">
+          {activeApp === 'home' && (
+            <>
+              <section className="py-8">
+                <div className="text-center space-y-4">
+                  <div className="inline-flex items-center space-x-2 bg-base-blue/10 border border-base-blue/30 rounded-full px-4 py-2 text-sm text-base-blue">
+                    <span>🔐</span>
+                    <span>HTTP 402 Payment Required</span>
+                  </div>
+                  <h2 className="text-3xl md:text-4xl font-bold text-white leading-tight">
+                    Multi-Creator Paywall <span className="text-base-blue">on Base</span>
+                  </h2>
+                  <p className="text-lg text-gray-400 max-w-2xl mx-auto">
+                    Create and monetize paywalled content. One-time payments, permanent access.
+                  </p>
+                  <div className="pt-4">
+                    <PlatformStats />
+                  </div>
+                </div>
+              </section>
+
+              <section className="pb-8">
+                <ContentBrowser />
+              </section>
+
+              <section className="py-8 border-t border-gray-800">
+                <h3 className="text-2xl font-bold text-white text-center mb-6">How It Works</h3>
+                <div className="grid md:grid-cols-4 gap-6">
+                  <div className="bg-gray-900/30 rounded-xl p-6 border border-gray-800">
+                    <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center mb-4">
+                      <span className="text-2xl">👩‍🎨</span>
+                    </div>
+                    <h4 className="text-lg font-semibold text-white mb-2">Become a Creator</h4>
+                    <p className="text-gray-400 text-sm">Register with your wallet. Start creating.</p>
+                  </div>
+                  <div className="bg-gray-900/30 rounded-xl p-6 border border-gray-800">
+                    <div className="w-12 h-12 bg-base-blue/20 rounded-lg flex items-center justify-center mb-4">
+                      <span className="text-2xl">📝</span>
+                    </div>
+                    <h4 className="text-lg font-semibold text-white mb-2">Create Content</h4>
+                    <p className="text-gray-400 text-sm">Set price and publish paywalled content.</p>
+                  </div>
+                  <div className="bg-gray-900/30 rounded-xl p-6 border border-gray-800">
+                    <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center mb-4">
+                      <span className="text-2xl">💳</span>
+                    </div>
+                    <h4 className="text-lg font-semibold text-white mb-2">Users Pay</h4>
+                    <p className="text-gray-400 text-sm">One-time ETH payments on Base.</p>
+                  </div>
+                  <div className="bg-gray-900/30 rounded-xl p-6 border border-gray-800">
+                    <div className="w-12 h-12 bg-yellow-500/20 rounded-lg flex items-center justify-center mb-4">
+                      <span className="text-2xl">💰</span>
+                    </div>
+                    <h4 className="text-lg font-semibold text-white mb-2">Get Paid</h4>
+                    <p className="text-gray-400 text-sm">Withdraw earnings anytime.</p>
+                  </div>
+                </div>
+              </section>
+            </>
+          )}
+
+          {activeApp === 'paywall' && (
+            <section>
+              <h3 className="text-xl font-bold text-white mb-6">Discover Paywalls</h3>
+              <ContentBrowser />
+            </section>
+          )}
+
+          {activeApp === 'creator' && (
+            <section>
+              <CreatorDashboardV2 />
+            </section>
+          )}
+
+          {activeApp === 'admin' && (
+            <section>
+              <PlatformAdminV2 />
+            </section>
+          )}
+
+          {activeApp === 'unlocked' && (
+            <section>
+              <UserUnlockedContentV2 />
+            </section>
+          )}
+
+          {activeApp === 'analytics' && (
+            <section>
+              <div className="bg-gray-900/50 rounded-2xl p-8 border border-gray-800">
+                <h3 className="text-xl font-bold text-white mb-2">Analytics</h3>
+                <p className="text-gray-400">Basic analytics coming soon — revenue, unlocks, trends.</p>
+              </div>
+            </section>
+          )}
         </div>
-      </section>
+      </div>
 
-      {/* Dashboard Section */}
-      <DashboardSection />
-
-      {/* Features Section */}
-      <section className="py-16 px-4 border-t border-gray-800">
-        <div className="max-w-6xl mx-auto">
-          <h3 className="text-2xl font-bold text-white text-center mb-12">How It Works</h3>
-          <div className="grid md:grid-cols-4 gap-6">
-            <div className="bg-gray-900/30 rounded-xl p-6 border border-gray-800">
-              <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center mb-4">
-                <span className="text-2xl">👩‍🎨</span>
-              </div>
-              <h4 className="text-lg font-semibold text-white mb-2">1. Become a Creator</h4>
-              <p className="text-gray-400 text-sm">
-                Register with your wallet. No approval needed, start creating instantly.
-              </p>
-            </div>
-            <div className="bg-gray-900/30 rounded-xl p-6 border border-gray-800">
-              <div className="w-12 h-12 bg-base-blue/20 rounded-lg flex items-center justify-center mb-4">
-                <span className="text-2xl">📝</span>
-              </div>
-              <h4 className="text-lg font-semibold text-white mb-2">2. Create Content</h4>
-              <p className="text-gray-400 text-sm">
-                Set your price and create paywalled content. Full control over your work.
-              </p>
-            </div>
-            <div className="bg-gray-900/30 rounded-xl p-6 border border-gray-800">
-              <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center mb-4">
-                <span className="text-2xl">💳</span>
-              </div>
-              <h4 className="text-lg font-semibold text-white mb-2">3. Users Pay</h4>
-              <p className="text-gray-400 text-sm">
-                Users pay once with ETH on Base to unlock content permanently.
-              </p>
-            </div>
-            <div className="bg-gray-900/30 rounded-xl p-6 border border-gray-800">
-              <div className="w-12 h-12 bg-yellow-500/20 rounded-lg flex items-center justify-center mb-4">
-                <span className="text-2xl">💰</span>
-              </div>
-              <h4 className="text-lg font-semibold text-white mb-2">4. Get Paid</h4>
-              <p className="text-gray-400 text-sm">
-                Withdraw your earnings anytime. 97.5% goes to you, 2.5% platform fee.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
       <footer className="border-t border-gray-800 py-8 px-4">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between text-sm text-gray-500">
           <div className="flex items-center space-x-2">
             <BaseLogo />
-            <span>BasePaywall v2 • Multi-tenant Web3 SaaS on Base</span>
+            <span>BasePaywall v2 • Super App on Base</span>
           </div>
           <div className="flex items-center space-x-6 mt-4 md:mt-0">
             <a
