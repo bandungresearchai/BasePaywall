@@ -387,37 +387,39 @@ export default function HomeV2() {
         </div>
       </div>
 
-      <footer className="border-t border-gray-800 py-8 px-4">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between text-sm text-gray-500">
-          <div className="flex items-center space-x-2">
-            <BaseLogo />
-            <span>BasePaywall v2 • Super App on Base</span>
-          </div>
-          <div className="flex items-center space-x-6 mt-4 md:mt-0">
-            <a
-              href="https://github.com/bandungresearchai/BasePaywall"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-white transition-colors"
-            >
-              GitHub
-            </a>
-            <a
-              href="https://base.org"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-white transition-colors"
-            >
-              Base
-            </a>
-            <a
-              href="https://onchainkit.xyz"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-white transition-colors"
-            >
-              OnchainKit
-            </a>
+      <footer className="mt-8">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="card p-6 flex flex-col md:flex-row items-center justify-between text-sm text-gray-500">
+            <div className="flex items-center space-x-2">
+              <BaseLogo />
+              <span>BasePaywall v2 • Super App on Base</span>
+            </div>
+            <div className="flex items-center space-x-6 mt-4 md:mt-0">
+              <a
+                href="https://github.com/bandungresearchai/BasePaywall"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-white transition-colors"
+              >
+                GitHub
+              </a>
+              <a
+                href="https://base.org"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-white transition-colors"
+              >
+                Base
+              </a>
+              <a
+                href="https://onchainkit.xyz"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-white transition-colors"
+              >
+                OnchainKit
+              </a>
+            </div>
           </div>
         </div>
       </footer>

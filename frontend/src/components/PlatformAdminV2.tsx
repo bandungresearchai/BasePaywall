@@ -42,7 +42,7 @@ export function PlatformAdminV2() {
   }
 
   return (
-    <div className="bg-gray-900/50 rounded-2xl p-8 border border-yellow-500/30">
+    <div className="card p-8">
       <div className="flex items-center space-x-3 mb-6">
         <span className="text-2xl">👑</span>
         <h3 className="text-2xl font-bold text-white">Platform Admin</h3>
@@ -58,26 +58,26 @@ export function PlatformAdminV2() {
         <>
           {/* Platform Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-gray-800/50 rounded-xl p-4 text-center">
+            <div className="card p-4 text-center">
               <p className="text-gray-500 text-xs">Creators</p>
               <p className="text-2xl font-bold text-white">{totalCreators}</p>
             </div>
-            <div className="bg-gray-800/50 rounded-xl p-4 text-center">
+            <div className="card p-4 text-center">
               <p className="text-gray-500 text-xs">Content Items</p>
               <p className="text-2xl font-bold text-white">{totalContents}</p>
             </div>
-            <div className="bg-gray-800/50 rounded-xl p-4 text-center">
+            <div className="card p-4 text-center">
               <p className="text-gray-500 text-xs">Total Revenue</p>
               <p className="text-2xl font-bold text-green-400">{totalRevenueEth} ETH</p>
             </div>
-            <div className="bg-gray-800/50 rounded-xl p-4 text-center">
+            <div className="card p-4 text-center">
               <p className="text-gray-500 text-xs">Platform Fee</p>
               <p className="text-2xl font-bold text-yellow-400">{feePercent}%</p>
             </div>
           </div>
 
           {/* Platform Withdrawal */}
-          <div className="bg-gradient-to-br from-yellow-900/30 to-orange-900/30 rounded-xl p-6 border border-yellow-500/30">
+          <div className="card p-6">
             <h4 className="text-lg font-semibold text-white mb-4">Platform Fees</h4>
             <div className="flex items-center justify-between mb-4">
               <span className="text-gray-400">Available to Withdraw</span>
@@ -86,7 +86,7 @@ export function PlatformAdminV2() {
             <button
               onClick={withdraw}
               disabled={isPending || isConfirming || platformBalanceEth === '0.0000'}
-              className="w-full bg-yellow-600 hover:bg-yellow-700 disabled:bg-gray-700 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 flex items-center justify-center space-x-2"
+              className="btn w-full bg-yellow-600 hover:bg-yellow-700 text-white"
             >
               {isPending || isConfirming ? (
                 <>
