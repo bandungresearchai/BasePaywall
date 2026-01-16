@@ -8,7 +8,251 @@ import { UserUnlockedContentV2 } from '@/components/UserUnlockedContentV2';
 import { PlatformAdminV2 } from '@/components/PlatformAdminV2';
 import { useAccount } from 'wagmi';
 import { usePlatformStats, useCreator, useNextContentId } from '@/hooks/usePaywallV2';
-import { useState } from 'react';
+import { useState, useEffect, createContext, useContext, useCallback } from 'react';
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THEME CONTEXT - Dark/Light Mode
+═══════════════════════════════════════════════════════════════════════════ */
+
+type Theme = 'dark' | 'light';
+
+const ThemeContext = createContext<{
+  theme: Theme;
+  toggleTheme: () => void;
+}>({
+  theme: 'dark',
+  toggleTheme: () => {},
+});
+
+function useTheme() {
+  return useContext(ThemeContext);
+}
+
+function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const [theme, setTheme] = useState<Theme>('dark');
+
+  useEffect(() => {
+    const saved = localStorage.getItem('theme') as Theme;
+    if (saved) setTheme(saved);
+  }, []);
+
+  const toggleTheme = useCallback(() => {
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+    localStorage.setItem('theme', newTheme);
+  }, [theme]);
+
+  return (
+    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+      {children}
+    </ThemeContext.Provider>
+  );
+}
+
+function ThemeToggle() {
+  const { theme, toggleTheme } = useTheme();
+  
+  return (
+    <button
+      onClick={toggleTheme}
+      className="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 dark:bg-white/5 dark:hover:bg-white/10 border border-white/10 flex items-center justify-center text-white/60 hover:text-white transition-all"
+      title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+    >
+      {theme === 'dark' ? (
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+      ) : (
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      )}
+    </button>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   NOTIFICATIONS SYSTEM
+═══════════════════════════════════════════════════════════════════════════ */
+
+interface Notification {
+  id: string;
+  type: 'success' | 'error' | 'info' | 'warning';
+  title: string;
+  message: string;
+  timestamp: Date;
+  read: boolean;
+}
+
+const NotificationContext = createContext<{
+  notifications: Notification[];
+  unreadCount: number;
+  addNotification: (n: Omit<Notification, 'id' | 'timestamp' | 'read'>) => void;
+  markAsRead: (id: string) => void;
+  markAllAsRead: () => void;
+  clearAll: () => void;
+}>({
+  notifications: [],
+  unreadCount: 0,
+  addNotification: () => {},
+  markAsRead: () => {},
+  markAllAsRead: () => {},
+  clearAll: () => {},
+});
+
+function useNotifications() {
+  return useContext(NotificationContext);
+}
+
+function NotificationProvider({ children }: { children: React.ReactNode }) {
+  const [notifications, setNotifications] = useState<Notification[]>([
+    {
+      id: '1',
+      type: 'info',
+      title: 'Welcome to BasePaywall!',
+      message: 'Connect your wallet to get started.',
+      timestamp: new Date(),
+      read: false,
+    },
+  ]);
+
+  const unreadCount = notifications.filter(n => !n.read).length;
+
+  const addNotification = useCallback((n: Omit<Notification, 'id' | 'timestamp' | 'read'>) => {
+    const newNotification: Notification = {
+      ...n,
+      id: Date.now().toString(),
+      timestamp: new Date(),
+      read: false,
+    };
+    setNotifications(prev => [newNotification, ...prev].slice(0, 50));
+  }, []);
+
+  const markAsRead = useCallback((id: string) => {
+    setNotifications(prev => 
+      prev.map(n => n.id === id ? { ...n, read: true } : n)
+    );
+  }, []);
+
+  const markAllAsRead = useCallback(() => {
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+  }, []);
+
+  const clearAll = useCallback(() => {
+    setNotifications([]);
+  }, []);
+
+  return (
+    <NotificationContext.Provider value={{ 
+      notifications, 
+      unreadCount, 
+      addNotification, 
+      markAsRead, 
+      markAllAsRead,
+      clearAll 
+    }}>
+      {children}
+    </NotificationContext.Provider>
+  );
+}
+
+function NotificationBell() {
+  const { notifications, unreadCount, markAsRead, markAllAsRead, clearAll } = useNotifications();
+  const [isOpen, setIsOpen] = useState(false);
+
+  const getIcon = (type: Notification['type']) => {
+    switch (type) {
+      case 'success': return '✅';
+      case 'error': return '❌';
+      case 'warning': return '⚠️';
+      default: return 'ℹ️';
+    }
+  };
+
+  const getTimeAgo = (date: Date) => {
+    const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
+    if (seconds < 60) return 'just now';
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+    return `${Math.floor(seconds / 86400)}d ago`;
+  };
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="relative w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-white/60 hover:text-white transition-all"
+      >
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+        </svg>
+        {unreadCount > 0 && (
+          <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[10px] font-bold text-white flex items-center justify-center animate-pulse">
+            {unreadCount > 9 ? '9+' : unreadCount}
+          </span>
+        )}
+      </button>
+
+      {isOpen && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
+          <div className="absolute right-0 top-12 w-80 max-h-96 overflow-hidden rounded-2xl bg-[#0a0a0f]/95 backdrop-blur-xl border border-white/10 shadow-2xl z-50">
+            <div className="p-4 border-b border-white/10 flex items-center justify-between">
+              <h3 className="font-semibold text-white">Notifications</h3>
+              <div className="flex items-center gap-2">
+                {unreadCount > 0 && (
+                  <button 
+                    onClick={markAllAsRead}
+                    className="text-xs text-blue-400 hover:text-blue-300"
+                  >
+                    Mark all read
+                  </button>
+                )}
+                {notifications.length > 0 && (
+                  <button 
+                    onClick={clearAll}
+                    className="text-xs text-white/40 hover:text-white/60"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+            </div>
+            <div className="max-h-72 overflow-y-auto">
+              {notifications.length === 0 ? (
+                <div className="p-8 text-center text-white/40 text-sm">
+                  No notifications
+                </div>
+              ) : (
+                notifications.map((n) => (
+                  <div 
+                    key={n.id}
+                    onClick={() => markAsRead(n.id)}
+                    className={`p-4 border-b border-white/5 hover:bg-white/5 cursor-pointer transition-colors ${
+                      !n.read ? 'bg-blue-500/5' : ''
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <span className="text-lg">{getIcon(n.type)}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="text-sm font-medium text-white truncate">{n.title}</p>
+                          {!n.read && <span className="w-2 h-2 rounded-full bg-blue-400 flex-shrink-0" />}
+                        </div>
+                        <p className="text-xs text-white/50 mt-0.5">{n.message}</p>
+                        <p className="text-[10px] text-white/30 mt-1">{getTimeAgo(n.timestamp)}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
 
 /* ═══════════════════════════════════════════════════════════════════════════
    DESIGN SYSTEM - Onchain Creator Hub Style
@@ -33,32 +277,43 @@ function BaseLogo({ size = 32 }: { size?: number }) {
 }
 
 function GlowOrb({ className = '' }: { className?: string }) {
+  const { theme } = useTheme();
   return (
-    <div className={`absolute rounded-full blur-3xl opacity-20 pointer-events-none ${className}`} />
+    <div className={`absolute rounded-full blur-3xl pointer-events-none ${theme === 'dark' ? 'opacity-20' : 'opacity-10'} ${className}`} />
   );
 }
 
 function NetworkBadge() {
   const { chain } = useAccount();
+  const { theme } = useTheme();
   if (!chain) return null;
 
   const isTestnet = chain.id === 84532;
   return (
-    <div className="flex items-center gap-2 bg-white/5 backdrop-blur-sm border border-white/10 px-3 py-1.5 rounded-full text-xs font-medium">
+    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${
+      theme === 'dark' 
+        ? 'bg-white/5 border border-white/10' 
+        : 'bg-gray-100 border border-gray-200'
+    }`}>
       <span className={`w-2 h-2 rounded-full animate-pulse ${isTestnet ? 'bg-amber-400' : 'bg-emerald-400'}`} />
-      <span className="text-white/70">{chain.name}</span>
+      <span className={theme === 'dark' ? 'text-white/70' : 'text-gray-600'}>{chain.name}</span>
     </div>
   );
 }
 
 function WalletAddress() {
   const { address, isConnected } = useAccount();
+  const { theme } = useTheme();
   if (!isConnected || !address) return null;
 
   return (
-    <div className="hidden md:flex items-center gap-2 bg-white/5 backdrop-blur-sm border border-white/10 px-3 py-1.5 rounded-full">
+    <div className={`hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full ${
+      theme === 'dark'
+        ? 'bg-white/5 border border-white/10'
+        : 'bg-gray-100 border border-gray-200'
+    }`}>
       <div className="w-2 h-2 rounded-full bg-emerald-400" />
-      <span className="text-white/60 text-xs font-mono">
+      <span className={`text-xs font-mono ${theme === 'dark' ? 'text-white/60' : 'text-gray-500'}`}>
         {address.slice(0, 6)}...{address.slice(-4)}
       </span>
     </div>
@@ -70,20 +325,27 @@ function WalletAddress() {
 ═══════════════════════════════════════════════════════════════════════════ */
 
 function StatCard({ label, value, icon, gradient }: { label: string; value: string | number; icon: string; gradient: string }) {
+  const { theme } = useTheme();
   return (
-    <div className="group relative overflow-hidden rounded-2xl bg-white/[0.03] border border-white/[0.06] p-5 hover:border-white/10 transition-all duration-300">
+    <div className={`group relative overflow-hidden rounded-2xl p-5 transition-all duration-300 ${
+      theme === 'dark'
+        ? 'bg-white/[0.03] border border-white/[0.06] hover:border-white/10'
+        : 'bg-white border border-gray-200 hover:border-gray-300 shadow-sm'
+    }`}>
       <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${gradient}`} />
       <div className="relative">
         <div className="flex items-center justify-between mb-3">
           <span className="text-2xl">{icon}</span>
-          <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">
-            <svg className="w-4 h-4 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+            theme === 'dark' ? 'bg-white/5' : 'bg-gray-100'
+          }`}>
+            <svg className={`w-4 h-4 ${theme === 'dark' ? 'text-white/30' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
             </svg>
           </div>
         </div>
-        <p className="text-2xl font-bold text-white mb-1">{value}</p>
-        <p className="text-xs text-white/40 uppercase tracking-wider">{label}</p>
+        <p className={`text-2xl font-bold mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{value}</p>
+        <p className={`text-xs uppercase tracking-wider ${theme === 'dark' ? 'text-white/40' : 'text-gray-500'}`}>{label}</p>
       </div>
     </div>
   );
@@ -112,6 +374,116 @@ function PlatformStats() {
         icon="💎" 
         gradient="bg-gradient-to-br from-emerald-500/10 to-transparent" 
       />
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SEARCH & FILTER
+═══════════════════════════════════════════════════════════════════════════ */
+
+function SearchBar({ value, onChange, placeholder = 'Search content...' }: { 
+  value: string; 
+  onChange: (v: string) => void;
+  placeholder?: string;
+}) {
+  const { theme } = useTheme();
+  
+  return (
+    <div className="relative">
+      <svg 
+        className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${
+          theme === 'dark' ? 'text-white/30' : 'text-gray-400'
+        }`}
+        fill="none" 
+        viewBox="0 0 24 24" 
+        stroke="currentColor"
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className={`w-full h-10 pl-10 pr-4 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${
+          theme === 'dark'
+            ? 'bg-white/5 border border-white/10 text-white placeholder-white/30 focus:border-blue-500/50'
+            : 'bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 focus:border-blue-500'
+        }`}
+      />
+      {value && (
+        <button
+          onClick={() => onChange('')}
+          className={`absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full flex items-center justify-center ${
+            theme === 'dark' ? 'bg-white/10 text-white/50 hover:text-white' : 'bg-gray-200 text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
+    </div>
+  );
+}
+
+type SortOption = 'newest' | 'oldest' | 'price-low' | 'price-high';
+
+function FilterDropdown({ value, onChange }: { value: SortOption; onChange: (v: SortOption) => void }) {
+  const { theme } = useTheme();
+  const [isOpen, setIsOpen] = useState(false);
+
+  const options: { value: SortOption; label: string }[] = [
+    { value: 'newest', label: 'Newest First' },
+    { value: 'oldest', label: 'Oldest First' },
+    { value: 'price-low', label: 'Price: Low to High' },
+    { value: 'price-high', label: 'Price: High to Low' },
+  ];
+
+  const currentLabel = options.find(o => o.value === value)?.label || 'Sort by';
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className={`h-10 px-4 rounded-xl flex items-center gap-2 transition-all ${
+          theme === 'dark'
+            ? 'bg-white/5 border border-white/10 text-white/70 hover:bg-white/10'
+            : 'bg-gray-50 border border-gray-200 text-gray-600 hover:bg-gray-100'
+        }`}
+      >
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+        </svg>
+        <span className="text-sm">{currentLabel}</span>
+        <svg className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {isOpen && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
+          <div className={`absolute right-0 top-12 w-48 rounded-xl overflow-hidden shadow-xl z-50 ${
+            theme === 'dark' ? 'bg-[#0a0a0f] border border-white/10' : 'bg-white border border-gray-200'
+          }`}>
+            {options.map((option) => (
+              <button
+                key={option.value}
+                onClick={() => { onChange(option.value); setIsOpen(false); }}
+                className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
+                  value === option.value
+                    ? theme === 'dark' ? 'bg-blue-500/20 text-blue-400' : 'bg-blue-50 text-blue-600'
+                    : theme === 'dark' ? 'text-white/70 hover:bg-white/5' : 'text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -244,8 +616,11 @@ function QuickStartGuide() {
    CONTENT BROWSER
 ═══════════════════════════════════════════════════════════════════════════ */
 
-function ContentBrowser() {
+function ContentBrowser({ showSearch = false }: { showSearch?: boolean }) {
+  const { theme } = useTheme();
   const [contentId, setContentId] = useState<string>('1');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState<SortOption>('newest');
   const { nextContentId } = useNextContentId();
   const hasContent = nextContentId > 1;
   const currentContentId = BigInt(contentId || '1');
@@ -253,15 +628,42 @@ function ContentBrowser() {
 
   return (
     <div className="space-y-6">
-      <QuickStartGuide />
+      {!showSearch && <QuickStartGuide />}
+
+      {/* Search & Filter Bar */}
+      {showSearch && (
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex-1">
+            <SearchBar 
+              value={searchQuery} 
+              onChange={(v) => {
+                setSearchQuery(v);
+                if (v && parseInt(v) > 0 && parseInt(v) <= maxId) {
+                  setContentId(v);
+                }
+              }}
+              placeholder="Search by content ID..."
+            />
+          </div>
+          <FilterDropdown value={sortBy} onChange={setSortBy} />
+        </div>
+      )}
 
       {/* Content Navigator */}
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-4 p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06]">
-        <span className="text-white/40 text-sm">Browse Content</span>
+      <div className={`flex flex-col sm:flex-row items-center justify-center gap-4 p-4 rounded-2xl ${
+        theme === 'dark' 
+          ? 'bg-white/[0.02] border border-white/[0.06]'
+          : 'bg-gray-50 border border-gray-200'
+      }`}>
+        <span className={`text-sm ${theme === 'dark' ? 'text-white/40' : 'text-gray-500'}`}>Browse Content</span>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setContentId(String(Math.max(1, Number(contentId) - 1)))}
-            className="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-white/60 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+            className={`w-10 h-10 rounded-xl border flex items-center justify-center transition-all disabled:opacity-30 disabled:cursor-not-allowed ${
+              theme === 'dark'
+                ? 'bg-white/5 hover:bg-white/10 border-white/10 text-white/60 hover:text-white'
+                : 'bg-white hover:bg-gray-50 border-gray-200 text-gray-500 hover:text-gray-700'
+            }`}
             disabled={Number(contentId) <= 1}
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -275,12 +677,20 @@ function ContentBrowser() {
               max={maxId}
               value={contentId}
               onChange={(e) => setContentId(e.target.value)}
-              className="w-20 h-10 bg-white/5 border border-white/10 rounded-xl px-3 text-white text-center font-medium focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition-all"
+              className={`w-20 h-10 rounded-xl px-3 text-center font-medium transition-all focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${
+                theme === 'dark'
+                  ? 'bg-white/5 border border-white/10 text-white focus:border-blue-500/50'
+                  : 'bg-white border border-gray-200 text-gray-900 focus:border-blue-500'
+              }`}
             />
           </div>
           <button
             onClick={() => setContentId(String(Math.min(maxId, Number(contentId) + 1)))}
-            className="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-white/60 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+            className={`w-10 h-10 rounded-xl border flex items-center justify-center transition-all disabled:opacity-30 disabled:cursor-not-allowed ${
+              theme === 'dark'
+                ? 'bg-white/5 hover:bg-white/10 border-white/10 text-white/60 hover:text-white'
+                : 'bg-white hover:bg-gray-50 border-gray-200 text-gray-500 hover:text-gray-700'
+            }`}
             disabled={!hasContent || Number(contentId) >= maxId}
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -289,7 +699,7 @@ function ContentBrowser() {
           </button>
         </div>
         {hasContent && (
-          <span className="text-white/30 text-xs">
+          <span className={`text-xs ${theme === 'dark' ? 'text-white/30' : 'text-gray-400'}`}>
             {maxId} item{maxId > 1 ? 's' : ''} available
           </span>
         )}
@@ -404,6 +814,7 @@ function Sidebar({ active, onChange }: { active: AppView; onChange: (v: AppView)
 ═══════════════════════════════════════════════════════════════════════════ */
 
 function HowItWorks() {
+  const { theme } = useTheme();
   const steps = [
     { icon: '👩‍🎨', title: 'Register', desc: 'Connect wallet & become a creator', gradient: 'from-purple-500/20' },
     { icon: '📝', title: 'Create', desc: 'Publish paywalled content', gradient: 'from-blue-500/20' },
@@ -414,18 +825,26 @@ function HowItWorks() {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
       {steps.map((step, i) => (
-        <div key={i} className="group relative overflow-hidden rounded-2xl bg-white/[0.02] border border-white/[0.06] p-5 hover:border-white/10 transition-all duration-300">
+        <div key={i} className={`group relative overflow-hidden rounded-2xl p-5 transition-all duration-300 ${
+          theme === 'dark'
+            ? 'bg-white/[0.02] border border-white/[0.06] hover:border-white/10'
+            : 'bg-white border border-gray-200 hover:border-gray-300 shadow-sm'
+        }`}>
           <div className={`absolute inset-0 bg-gradient-to-br ${step.gradient} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
           <div className="relative">
-            <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 ${
+              theme === 'dark' ? 'bg-white/5' : 'bg-gray-100'
+            }`}>
               <span className="text-2xl">{step.icon}</span>
             </div>
-            <h4 className="text-base font-semibold text-white mb-1">{step.title}</h4>
-            <p className="text-xs text-white/40 leading-relaxed">{step.desc}</p>
+            <h4 className={`text-base font-semibold mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{step.title}</h4>
+            <p className={`text-xs leading-relaxed ${theme === 'dark' ? 'text-white/40' : 'text-gray-500'}`}>{step.desc}</p>
           </div>
           {/* Step number */}
-          <div className="absolute top-3 right-3 w-6 h-6 rounded-full bg-white/5 flex items-center justify-center">
-            <span className="text-[10px] text-white/30 font-medium">{i + 1}</span>
+          <div className={`absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center ${
+            theme === 'dark' ? 'bg-white/5' : 'bg-gray-100'
+          }`}>
+            <span className={`text-[10px] font-medium ${theme === 'dark' ? 'text-white/30' : 'text-gray-400'}`}>{i + 1}</span>
           </div>
         </div>
       ))}
@@ -437,32 +856,41 @@ function HowItWorks() {
    MAIN APP
 ═══════════════════════════════════════════════════════════════════════════ */
 
-export default function Home() {
+function HomeContent() {
+  const { theme } = useTheme();
   const [activeView, setActiveView] = useState<AppView>('home');
 
   return (
-    <main className="min-h-screen bg-[#0a0a0f] text-white">
+    <main className={`min-h-screen ${theme === 'dark' ? 'bg-[#0a0a0f] text-white' : 'bg-gray-50 text-gray-900'}`}>
       {/* Background Effects */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <GlowOrb className="bg-blue-600 w-96 h-96 -top-48 -left-48" />
         <GlowOrb className="bg-purple-600 w-96 h-96 -bottom-48 -right-48" />
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0wIDBoNjB2NjBIMHoiLz48cGF0aCBkPSJNMzAgMzBtLTEgMGExIDEgMCAxIDAgMiAwYTEgMSAwIDEgMCAtMiAwIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDMpIi8+PC9nPjwvc3ZnPg==')] opacity-50" />
+        {theme === 'dark' && (
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0wIDBoNjB2NjBIMHoiLz48cGF0aCBkPSJNMzAgMzBtLTEgMGExIDEgMCAxIDAgMiAwYTEgMSAwIDEgMCAtMiAwIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDMpIi8+PC9nPjwvc3ZnPg==')] opacity-50" />
+        )}
       </div>
 
       {/* Header */}
-      <header className="relative border-b border-white/[0.06] backdrop-blur-xl bg-black/20 sticky top-0 z-50">
+      <header className={`relative border-b backdrop-blur-xl sticky top-0 z-50 ${
+        theme === 'dark' 
+          ? 'border-white/[0.06] bg-black/20' 
+          : 'border-gray-200 bg-white/80'
+      }`}>
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
               <BaseLogo size={18} />
             </div>
             <div className="hidden sm:block">
-              <h1 className="text-base font-bold text-white">BasePaywall</h1>
-              <span className="text-[10px] text-white/30">Creator Hub</span>
+              <h1 className={`text-base font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>BasePaywall</h1>
+              <span className={`text-[10px] ${theme === 'dark' ? 'text-white/30' : 'text-gray-500'}`}>Creator Hub</span>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <WalletAddress />
+            <NotificationBell />
+            <ThemeToggle />
             <WalletConnect />
           </div>
         </div>
@@ -483,20 +911,28 @@ export default function Home() {
             {activeView === 'home' && (
               <>
                 {/* Hero Section */}
-                <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600/20 via-purple-600/10 to-indigo-600/20 border border-white/[0.08] p-8 md:p-12">
+                <section className={`relative overflow-hidden rounded-3xl p-8 md:p-12 ${
+                  theme === 'dark'
+                    ? 'bg-gradient-to-br from-blue-600/20 via-purple-600/10 to-indigo-600/20 border border-white/[0.08]'
+                    : 'bg-gradient-to-br from-blue-100 via-purple-50 to-indigo-100 border border-gray-200'
+                }`}>
                   <GlowOrb className="bg-blue-500 w-64 h-64 -top-32 -right-32" />
                   <div className="relative max-w-2xl">
-                    <div className="inline-flex items-center gap-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-full px-4 py-1.5 text-xs font-medium text-white/70 mb-6">
+                    <div className={`inline-flex items-center gap-2 backdrop-blur-sm rounded-full px-4 py-1.5 text-xs font-medium mb-6 ${
+                      theme === 'dark'
+                        ? 'bg-white/5 border border-white/10 text-white/70'
+                        : 'bg-white/80 border border-gray-200 text-gray-600'
+                    }`}>
                       <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
                       HTTP 402 Payment Required
                     </div>
-                    <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight mb-4">
+                    <h2 className={`text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                       Monetize Your Content{' '}
-                      <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">
+                      <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-indigo-500">
                         On-Chain
                       </span>
                     </h2>
-                    <p className="text-lg text-white/50 leading-relaxed mb-8">
+                    <p className={`text-lg leading-relaxed mb-8 ${theme === 'dark' ? 'text-white/50' : 'text-gray-600'}`}>
                       Create paywalled content, accept one-time payments, give permanent access. 
                       Built on Base for low fees and instant transactions.
                     </p>
@@ -509,7 +945,11 @@ export default function Home() {
                       </button>
                       <button 
                         onClick={() => setActiveView('discover')}
-                        className="px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-white font-medium hover:bg-white/10 transition-all duration-300"
+                        className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
+                          theme === 'dark'
+                            ? 'bg-white/5 border border-white/10 text-white hover:bg-white/10'
+                            : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
+                        }`}
                       >
                         Explore Content
                       </button>
@@ -523,8 +963,8 @@ export default function Home() {
                 {/* How It Works */}
                 <section>
                   <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-xl font-bold text-white">How It Works</h3>
-                    <span className="text-xs text-white/30">4 simple steps</span>
+                    <h3 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>How It Works</h3>
+                    <span className={`text-xs ${theme === 'dark' ? 'text-white/30' : 'text-gray-400'}`}>4 simple steps</span>
                   </div>
                   <HowItWorks />
                 </section>
@@ -532,7 +972,7 @@ export default function Home() {
                 {/* Quick Access Content Browser */}
                 <section>
                   <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-xl font-bold text-white">Quick Access</h3>
+                    <h3 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Quick Access</h3>
                     <button 
                       onClick={() => setActiveView('discover')}
                       className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
@@ -548,10 +988,10 @@ export default function Home() {
             {activeView === 'discover' && (
               <section className="space-y-6">
                 <div>
-                  <h2 className="text-2xl font-bold text-white mb-2">Discover Content</h2>
-                  <p className="text-white/40">Browse and unlock premium content from creators</p>
+                  <h2 className={`text-2xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Discover Content</h2>
+                  <p className={theme === 'dark' ? 'text-white/40' : 'text-gray-500'}>Browse and unlock premium content from creators</p>
                 </div>
-                <ContentBrowser />
+                <ContentBrowser showSearch />
               </section>
             )}
 
@@ -576,15 +1016,21 @@ export default function Home() {
             {activeView === 'analytics' && (
               <section className="space-y-6">
                 <div>
-                  <h2 className="text-2xl font-bold text-white mb-2">Analytics</h2>
-                  <p className="text-white/40">Track your performance and insights</p>
+                  <h2 className={`text-2xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Analytics</h2>
+                  <p className={theme === 'dark' ? 'text-white/40' : 'text-gray-500'}>Track your performance and insights</p>
                 </div>
-                <div className="rounded-2xl bg-white/[0.02] border border-white/[0.06] p-12 text-center">
-                  <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mx-auto mb-4">
+                <div className={`rounded-2xl p-12 text-center ${
+                  theme === 'dark'
+                    ? 'bg-white/[0.02] border border-white/[0.06]'
+                    : 'bg-white border border-gray-200'
+                }`}>
+                  <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 ${
+                    theme === 'dark' ? 'bg-white/5' : 'bg-gray-100'
+                  }`}>
                     <span className="text-3xl">📊</span>
                   </div>
-                  <h3 className="text-lg font-semibold text-white mb-2">Coming Soon</h3>
-                  <p className="text-sm text-white/40 max-w-md mx-auto">
+                  <h3 className={`text-lg font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Coming Soon</h3>
+                  <p className={`text-sm max-w-md mx-auto ${theme === 'dark' ? 'text-white/40' : 'text-gray-500'}`}>
                     Detailed analytics including revenue trends, unlock rates, and audience insights will be available soon.
                   </p>
                 </div>
@@ -595,23 +1041,23 @@ export default function Home() {
       </div>
 
       {/* Footer */}
-      <footer className="relative mt-16 border-t border-white/[0.06]">
+      <footer className={`relative mt-16 border-t ${theme === 'dark' ? 'border-white/[0.06]' : 'border-gray-200'}`}>
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
                 <BaseLogo size={16} />
               </div>
-              <span className="text-sm text-white/40">BasePaywall • Creator Hub on Base</span>
+              <span className={`text-sm ${theme === 'dark' ? 'text-white/40' : 'text-gray-500'}`}>BasePaywall • Creator Hub on Base</span>
             </div>
             <div className="flex items-center gap-6 text-sm">
-              <a href="https://github.com/bandungresearchai/BasePaywall" target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-white transition-colors">
+              <a href="https://github.com/bandungresearchai/BasePaywall" target="_blank" rel="noopener noreferrer" className={`transition-colors ${theme === 'dark' ? 'text-white/40 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}>
                 GitHub
               </a>
-              <a href="https://base.org" target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-white transition-colors">
+              <a href="https://base.org" target="_blank" rel="noopener noreferrer" className={`transition-colors ${theme === 'dark' ? 'text-white/40 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}>
                 Base
               </a>
-              <a href="https://onchainkit.xyz" target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-white transition-colors">
+              <a href="https://onchainkit.xyz" target="_blank" rel="noopener noreferrer" className={`transition-colors ${theme === 'dark' ? 'text-white/40 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}>
                 OnchainKit
               </a>
             </div>
@@ -619,5 +1065,19 @@ export default function Home() {
         </div>
       </footer>
     </main>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   EXPORT - Wrap with Providers
+═══════════════════════════════════════════════════════════════════════════ */
+
+export default function Home() {
+  return (
+    <ThemeProvider>
+      <NotificationProvider>
+        <HomeContent />
+      </NotificationProvider>
+    </ThemeProvider>
   );
 }
