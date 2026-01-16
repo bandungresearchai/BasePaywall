@@ -1,9 +1,13 @@
 'use client';
 
 import { useContentAccess, useUnlockContent, useContent } from '@/hooks/usePaywallV2';
-import { useExplorer, useNetwork } from '@/hooks/useNetwork';
+import { useNetwork } from '@/hooks/useNetwork';
 import { useNetworkGuard } from '@/components/NetworkGuard';
 import { useAccount } from 'wagmi';
+import ConfirmModal from '@/components/ConfirmModal';
+import React from 'react';
+import TransactionReceipt from '@/components/TransactionReceipt';
+import Button from '@/components/ui/Button';
 
 interface PaywallContentV2Props {
   contentId: bigint;
@@ -75,43 +79,7 @@ function LoadingSpinner() {
   );
 }
 
-function TransactionReceipt({ hash, priceEth }: { hash: string; priceEth: string }) {
-  const { getTransactionUrl } = useExplorer();
-
-  return (
-    <div className="bg-green-900/30 border border-green-500/30 rounded-xl p-4 w-full">
-      <div className="flex items-center space-x-2 mb-3">
-        <span className="text-green-400 text-lg">✅</span>
-        <span className="text-green-400 font-semibold">Payment Confirmed!</span>
-      </div>
-      <div className="space-y-2 text-sm">
-        <div className="flex justify-between text-gray-400">
-          <span>Amount Paid:</span>
-          <span className="text-white">{priceEth} ETH</span>
-        </div>
-        <div className="flex justify-between text-gray-400">
-          <span>Transaction:</span>
-          <a
-            href={getTransactionUrl(hash)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-base-blue hover:underline font-mono text-xs"
-          >
-            {hash.slice(0, 10)}...{hash.slice(-8)}
-          </a>
-        </div>
-      </div>
-      <a
-        href={getTransactionUrl(hash)}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="mt-3 block w-full text-center bg-green-600/20 hover:bg-green-600/30 text-green-400 py-2 rounded-lg transition-colors text-sm"
-      >
-        View on BaseScan →
-      </a>
-    </div>
-  );
-}
+// TransactionReceipt moved to shared component
 
 function WrongNetworkBanner() {
   const { switchToDefault, isSwitching, defaultChain } = useNetwork();
@@ -317,36 +285,25 @@ export function PaywallContentV2({
               <span className="text-red-400 font-semibold">Transaction Failed</span>
             </div>
             <p className="text-sm text-gray-400 mb-3">{error}</p>
-            <button
+            <Button
               onClick={reset}
-              className="w-full bg-red-600/20 hover:bg-red-600/30 text-red-400 py-2 rounded-lg transition-colors text-sm"
+              className="w-full text-red-400 py-2 rounded-lg transition-colors text-sm bg-red-600/20 hover:bg-red-600/30"
             >
               Try Again
-            </button>
+            </Button>
           </div>
         )}
 
-        {/* Pay button */}
+        {/* Pay button with confirmation modal */}
         {txStatus !== 'success' && (
-          <button
-            onClick={unlock}
-            disabled={shouldBlockTransaction || isPending || isConfirming || hasAccess}
-            className={`btn btn-primary w-full ${shouldBlockTransaction ? 'opacity-80' : ''}`}
-          >
-            {isPending || isConfirming ? (
-              <>
-                <LoadingSpinner />
-                <span>{isPending ? 'Confirm in Wallet' : 'Processing...'}</span>
-              </>
-            ) : shouldBlockTransaction ? (
-              <span>Switch Network to Pay</span>
-            ) : (
-              <>
-                <span>🔓</span>
-                <span>Unlock Content for {priceEth} ETH</span>
-              </>
-            )}
-          </button>
+          <PayButtonWithConfirmV2
+            shouldBlockTransaction={shouldBlockTransaction}
+            isPending={isPending}
+            isConfirming={isConfirming}
+            priceEth={priceEth}
+            onPay={unlock}
+            hasAccess={hasAccess}
+          />
         )}
 
         {/* HTTP 402 reference */}
@@ -357,3 +314,65 @@ export function PaywallContentV2({
     </div>
   );
 }
+
+  function PayButtonWithConfirmV2({
+    shouldBlockTransaction,
+    isPending,
+    isConfirming,
+    priceEth,
+    onPay,
+    hasAccess,
+  }: {
+    shouldBlockTransaction: boolean;
+    isPending: boolean;
+    isConfirming: boolean;
+    priceEth: string;
+    onPay: () => void;
+    hasAccess: boolean;
+  }) {
+    const [showConfirm, setShowConfirm] = React.useState(false);
+
+    const handleConfirm = () => {
+      setShowConfirm(false);
+      onPay();
+    };
+
+    if (hasAccess) return <div className="text-sm text-gray-400">Already unlocked</div>;
+
+    return (
+      <>
+        <Button
+          onClick={() => setShowConfirm(true)}
+          disabled={shouldBlockTransaction || isPending || isConfirming}
+          variant="primary"
+          className={`w-full ${shouldBlockTransaction ? 'opacity-80' : ''}`}
+        >
+          {isConfirming || isPending ? (
+            <>
+              <LoadingSpinner />
+              <span>{isPending ? 'Confirm in Wallet' : 'Processing...'}</span>
+            </>
+          ) : shouldBlockTransaction ? (
+            <span>Switch Network to Pay</span>
+          ) : (
+            <>
+              <span>🔓</span>
+              <span>Unlock Content for {priceEth} ETH</span>
+            </>
+          )}
+        </Button>
+
+        {showConfirm && (
+          <ConfirmModal
+            title="Confirm Payment"
+            description={`Unlock this content for ${priceEth} ETH?`}
+            confirmLabel="Pay"
+            cancelLabel="Cancel"
+            onConfirm={handleConfirm}
+            onCancel={() => setShowConfirm(false)}
+            loading={isPending || isConfirming}
+          />
+        )}
+      </>
+    );
+  }

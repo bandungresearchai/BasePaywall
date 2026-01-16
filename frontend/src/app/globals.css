@@ -2,15 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   DESIGN SYSTEM - Onchain Creator Hub
+═══════════════════════════════════════════════════════════════════════════ */
+
 :root {
-  /* Colors (rgb) */
+  /* Core Colors */
   --color-foreground-rgb: 255, 255, 255;
   --color-primary-rgb: 0, 82, 255;
   --color-primary-600: #0052FF;
   --color-accent-rgb: 124, 58, 237;
-  --color-neutral-900-rgb: 10, 11, 13;
-  --background-start-rgb: 10, 11, 13;
-  --background-end-rgb: 10, 11, 13;
+  --color-neutral-900-rgb: 10, 10, 15;
+  --background-start-rgb: 10, 10, 15;
+  --background-end-rgb: 10, 10, 15;
 
   /* Spacing & sizing */
   --space-1: 4px;
@@ -18,87 +22,253 @@
   --space-3: 12px;
   --space-4: 16px;
   --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
 
   /* Radii */
-  --radius-sm: 6px;
-  --radius-md: 10px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
   --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-2xl: 32px;
 
   /* Elevation */
-  --elevation-card: 0 6px 18px rgba(2,6,23,0.5);
-  --elevation-glow: 0 8px 40px rgba(0,82,255,0.18);
+  --elevation-card: 0 8px 32px rgba(0,0,0,0.4);
+  --elevation-glow: 0 8px 40px rgba(0,82,255,0.15);
+  --elevation-glow-lg: 0 20px 60px rgba(0,82,255,0.2);
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-normal: 200ms ease;
+  --transition-slow: 300ms ease;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BASE STYLES
+═══════════════════════════════════════════════════════════════════════════ */
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   color: rgb(var(--color-foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  background-color: #0a0a0f;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.01em;
 }
 
-/* Custom scrollbar */
+/* Selection */
+::selection {
+  background-color: rgba(0, 82, 255, 0.3);
+  color: white;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SCROLLBAR
+═══════════════════════════════════════════════════════════════════════════ */
+
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #1a1b1f;
+  background: rgba(255, 255, 255, 0.02);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #0052FF;
-  border-radius: 4px;
+  background: rgba(0, 82, 255, 0.3);
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #0066FF;
+  background: rgba(0, 82, 255, 0.5);
 }
 
-/* OnchainKit overrides */
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 82, 255, 0.3) rgba(255, 255, 255, 0.02);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ONCHAINKIT OVERRIDES
+═══════════════════════════════════════════════════════════════════════════ */
+
 .ock-font-family {
   font-family: inherit !important;
 }
 
-/* Glow effect for premium content */
-.glow-effect {
+/* Make OnchainKit buttons match our design */
+[data-testid="ockConnectWallet_Container"] button,
+.ock-connect-button {
+  border-radius: var(--radius-md) !important;
+  font-weight: 500 !important;
+  transition: all var(--transition-normal) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   UTILITY CLASSES
+═══════════════════════════════════════════════════════════════════════════ */
+
+/* Glass morphism card */
+.card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--elevation-card);
+  backdrop-filter: blur(12px);
+}
+
+.card-hover {
+  transition: all var(--transition-normal);
+}
+
+.card-hover:hover {
+  border-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
   box-shadow: var(--elevation-glow);
 }
 
-/* Locked content overlay */
-.locked-overlay {
-  backdrop-filter: blur(8px);
-}
-
-/* Design system utilities */
-.card {
-  background: rgba(17, 18, 20, 0.6);
-  border: 1px solid rgba(255,255,255,0.03);
-  border-radius: var(--radius-md);
-  box-shadow: var(--elevation-card);
-}
-
+/* Buttons */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 10px 16px;
+  padding: 12px 20px;
   border-radius: var(--radius-md);
-  font-weight: 600;
+  font-weight: 500;
+  font-size: 14px;
+  transition: all var(--transition-normal);
+  cursor: pointer;
+  border: none;
+  outline: none;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .btn-primary {
-  background-color: var(--color-primary-600);
+  background: linear-gradient(135deg, #0052FF 0%, #4f46e5 100%);
+  color: white;
+  box-shadow: 0 4px 20px rgba(0, 82, 255, 0.25);
+}
+
+.btn-primary:hover:not(:disabled) {
+  box-shadow: 0 6px 30px rgba(0, 82, 255, 0.4);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   color: white;
 }
 
+.btn-secondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Glow effects */
+.glow-effect {
+  box-shadow: var(--elevation-glow);
+}
+
+.glow-effect-lg {
+  box-shadow: var(--elevation-glow-lg);
+}
+
+/* Locked content overlay */
+.locked-overlay {
+  backdrop-filter: blur(12px);
+}
+
+/* Text utilities */
 .muted {
-  color: rgba(255,255,255,0.6);
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #0052FF 0%, #a855f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════════════════════════════════════════ */
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE UTILITIES
+═══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 640px) {
+  .hide-mobile {
+    display: none !important;
+  }
+}
+
+@media (min-width: 641px) {
+  .hide-desktop {
+    display: none !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FOCUS STATES (Accessibility)
+═══════════════════════════════════════════════════════════════════════════ */
+
+:focus-visible {
+  outline: 2px solid rgba(0, 82, 255, 0.5);
+  outline-offset: 2px;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 2px solid rgba(0, 82, 255, 0.5);
+  outline-offset: 2px;
 }

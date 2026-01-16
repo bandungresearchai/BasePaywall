@@ -10,6 +10,12 @@ const nextConfig = {
       ...(config.resolve.alias || {}),
       '@react-native-async-storage/async-storage': require('path').resolve(__dirname, 'mocks/emptyAsyncStorage.js'),
     };
+
+    // Optional: when NEXT_PUBLIC_STUB_WAGMI=1, alias `wagmi` to a lightweight
+    // client-side stub to make automated E2E tests deterministic.
+    if (process.env.NEXT_PUBLIC_STUB_WAGMI === '1') {
+      config.resolve.alias['wagmi'] = require('path').resolve(__dirname, 'mocks/wagmiStubClient.js');
+    }
     return config;
   },
 };

@@ -236,7 +236,7 @@ export function WalletConnect() {
         <button
           onClick={() => setShowModal(true)}
           disabled={isPending}
-          className="flex items-center space-x-2 bg-base-blue hover:bg-blue-600 disabled:bg-gray-700 text-white font-medium px-4 py-2 rounded-xl transition-all"
+          className={`btn btn-primary flex items-center space-x-2 ${isPending ? 'opacity-80' : ''}`}
         >
           {isPending ? (
             <>
@@ -324,7 +324,7 @@ export function WalletButton({ className = '' }: { className?: string }) {
       <button
         onClick={() => setShowModal(true)}
         disabled={isPending}
-        className={`bg-base-blue hover:bg-blue-600 disabled:bg-gray-700 text-white font-medium px-6 py-3 rounded-xl transition-all ${className}`}
+        className={`btn btn-primary ${className}`}
       >
         {isPending ? 'Connecting...' : 'Connect Wallet'}
       </button>
