@@ -96,7 +96,7 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   ONCHAINKIT OVERRIDES
+   ONCHAINKIT OVERRIDES - Fix wallet modal styling
 ═══════════════════════════════════════════════════════════════════════════ */
 
 .ock-font-family {
@@ -109,6 +109,103 @@ body {
   border-radius: var(--radius-md) !important;
   font-weight: 500 !important;
   transition: all var(--transition-normal) !important;
+}
+
+/* Override OnchainKit wallet modal colors */
+[data-testid="ockModalOverlay"],
+.ock-modal-overlay {
+  background-color: rgba(0, 0, 0, 0.7) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+[data-testid="ockModal"],
+.ock-modal,
+[class*="ock-"] > div[role="dialog"],
+div[role="dialog"][class*="ock-"] {
+  background-color: #111827 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 16px !important;
+  color: white !important;
+}
+
+/* Fix the orange header in wallet modal */
+[data-testid="ockModal"] > div:first-child,
+.ock-modal > div:first-child,
+[class*="ock-wallet"] header,
+[class*="ock-"] header,
+div[class*="bg-[#F97316]"],
+div[style*="background-color: rgb(249, 115, 22)"],
+div[style*="background: rgb(249, 115, 22)"] {
+  background-color: #1f2937 !important;
+  background: #1f2937 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* OnchainKit wallet list items */
+[data-testid="ockWalletOption"],
+.ock-wallet-option,
+[class*="ock-"] button[class*="wallet"],
+[class*="ock-connect"] button {
+  background-color: rgba(31, 41, 55, 0.5) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 12px !important;
+  color: white !important;
+}
+
+[data-testid="ockWalletOption"]:hover,
+.ock-wallet-option:hover,
+[class*="ock-"] button[class*="wallet"]:hover {
+  background-color: rgba(31, 41, 55, 0.8) !important;
+  border-color: #0052FF !important;
+}
+
+/* OnchainKit dropdown */
+[data-testid="ockWalletDropdown"],
+.ock-wallet-dropdown {
+  background-color: #111827 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 12px !important;
+}
+
+/* OnchainKit identity */
+[data-testid="ockIdentity"],
+.ock-identity {
+  color: white !important;
+}
+
+[data-testid="ockAddress"],
+.ock-address {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* OnchainKit connect button text */
+[class*="ock-"] span,
+[class*="ock-"] p {
+  color: inherit !important;
+}
+
+/* Fix any remaining orange/accent colors */
+[class*="ock-"][class*="bg-"],
+[class*="ock-"] [class*="bg-orange"],
+[class*="ock-"] [class*="bg-amber"] {
+  background-color: #0052FF !important;
+}
+
+/* Wallet modal container fix */
+.fixed[class*="bg-black"] > div[class*="rounded"],
+.fixed.inset-0 > div[class*="bg-"] {
+  background-color: #111827 !important;
+}
+
+/* Text colors in wallet UI */
+[class*="ock-"] h1,
+[class*="ock-"] h2,
+[class*="ock-"] h3 {
+  color: white !important;
+}
+
+[class*="ock-"] [class*="text-gray"] {
+  color: rgba(255, 255, 255, 0.6) !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════

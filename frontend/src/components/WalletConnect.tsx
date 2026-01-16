@@ -76,20 +76,37 @@ function WalletSelectionModal({
 }) {
   const { connectors } = useConnect();
   
-  // Filter and deduplicate connectors
-  const availableConnectors = connectors.filter((connector, index, self) => 
-    index === self.findIndex(c => c.id === connector.id)
-  );
+  // Filter and deduplicate connectors - prioritize certain wallets
+  const availableConnectors = connectors
+    .filter((connector, index, self) => 
+      index === self.findIndex(c => c.id === connector.id)
+    )
+    .sort((a, b) => {
+      // Prioritize: Coinbase > Injected (MetaMask) > WalletConnect
+      const priority: Record<string, number> = {
+        'coinbaseWalletSDK': 1,
+        'injected': 2,
+        'metaMaskSDK': 3,
+        'walletConnect': 4,
+      };
+      return (priority[a.id] || 99) - (priority[b.id] || 99);
+    });
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-sm overflow-hidden">
+    <div 
+      className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[100] p-4"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div 
+        className="bg-[#111827] border border-white/10 rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-[#1f2937]">
           <h3 className="text-lg font-semibold text-white">Connect Wallet</h3>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors"
+            className="text-gray-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/10"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M18 6L6 18M6 6l12 12" />
@@ -107,23 +124,23 @@ function WalletSelectionModal({
               <button
                 key={connector.id}
                 onClick={() => onSelect(connector.id)}
-                className="w-full flex items-center space-x-3 p-4 rounded-xl bg-gray-800/50 hover:bg-gray-800 border border-gray-700 hover:border-base-blue transition-all group"
+                className="w-full flex items-center space-x-3 p-4 rounded-xl bg-[#1f2937]/50 hover:bg-[#1f2937] border border-white/10 hover:border-blue-500 transition-all group"
               >
-                <div className="flex-shrink-0">
+                <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-[#374151] flex items-center justify-center">
                   <Icon />
                 </div>
                 <div className="flex-1 text-left">
-                  <span className="text-white font-medium group-hover:text-base-blue transition-colors">
+                  <span className="text-white font-medium group-hover:text-blue-400 transition-colors">
                     {displayName}
                   </span>
                   {connector.id === 'coinbaseWalletSDK' && (
-                    <span className="ml-2 text-xs bg-base-blue/20 text-base-blue px-2 py-0.5 rounded-full">
+                    <span className="ml-2 text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full">
                       Recommended
                     </span>
                   )}
                 </div>
                 <svg 
-                  className="w-5 h-5 text-gray-500 group-hover:text-base-blue transition-colors" 
+                  className="w-5 h-5 text-gray-500 group-hover:text-blue-400 transition-colors" 
                   fill="none" 
                   viewBox="0 0 24 24" 
                   stroke="currentColor"
@@ -136,8 +153,8 @@ function WalletSelectionModal({
         </div>
         
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-800 bg-gray-900/50">
-          <p className="text-xs text-gray-500 text-center">
+        <div className="px-6 py-4 border-t border-white/10 bg-[#0f172a]">
+          <p className="text-xs text-gray-400 text-center">
             Only Base and Base Sepolia networks are supported
           </p>
         </div>

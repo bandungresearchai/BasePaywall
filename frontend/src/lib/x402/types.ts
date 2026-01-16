@@ -1,7 +1,11 @@
 /**
  * x402 Protocol Types
  * Implementation of Coinbase's x402 HTTP 402 Payment Required protocol
+ * Extended with ERC20 token support for IDRX stablecoin integration
  */
+
+/** Supported payment assets */
+export type X402PaymentAsset = 'ETH' | 'IDRX' | 'USDC';
 
 export interface X402PaymentDetails {
   /** Version of x402 protocol */
@@ -10,7 +14,7 @@ export interface X402PaymentDetails {
   network: 'base' | 'base-sepolia';
   /** Payment recipient address */
   payTo: `0x${string}`;
-  /** Maximum amount willing to pay (in wei) */
+  /** Maximum amount willing to pay (in wei for ETH, smallest unit for tokens) */
   maxAmountRequired: string;
   /** Resource being paid for */
   resource: string;
@@ -20,6 +24,14 @@ export interface X402PaymentDetails {
   mimeType?: string;
   /** Optional: Expiration timestamp */
   expiry?: number;
+  /** Optional: Payment asset type (default: ETH) */
+  asset?: X402PaymentAsset;
+  /** Optional: Token contract address for ERC20 payments */
+  tokenAddress?: `0x${string}`;
+  /** Optional: Token decimals for display */
+  tokenDecimals?: number;
+  /** Optional: Token symbol for display */
+  tokenSymbol?: string;
 }
 
 export interface X402PaymentPayload {
@@ -31,6 +43,10 @@ export interface X402PaymentPayload {
   transactionHash: `0x${string}`;
   /** Payer's address */
   payer: `0x${string}`;
+  /** Optional: Payment asset type */
+  asset?: X402PaymentAsset;
+  /** Optional: Token address for ERC20 payments */
+  tokenAddress?: `0x${string}`;
 }
 
 export interface X402Response {

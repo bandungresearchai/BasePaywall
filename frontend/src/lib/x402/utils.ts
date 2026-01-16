@@ -1,4 +1,4 @@
-import { X402PaymentDetails, X402PaymentPayload, X402_HEADER, X402_PAYMENT_HEADER, X402_VERSION } from './types';
+import { X402PaymentDetails, X402PaymentPayload, X402_HEADER, X402_PAYMENT_HEADER, X402_VERSION, X402PaymentAsset } from './types';
 
 /**
  * Create x402 payment required response headers
@@ -18,6 +18,19 @@ export function createX402Headers(paymentDetails: X402PaymentDetails): Headers {
   }
   if (paymentDetails.expiry) {
     headers.set('X-Payment-Expiry', paymentDetails.expiry.toString());
+  }
+  // ERC20 token support
+  if (paymentDetails.asset) {
+    headers.set('X-Payment-Asset', paymentDetails.asset);
+  }
+  if (paymentDetails.tokenAddress) {
+    headers.set('X-Payment-TokenAddress', paymentDetails.tokenAddress);
+  }
+  if (paymentDetails.tokenDecimals !== undefined) {
+    headers.set('X-Payment-TokenDecimals', paymentDetails.tokenDecimals.toString());
+  }
+  if (paymentDetails.tokenSymbol) {
+    headers.set('X-Payment-TokenSymbol', paymentDetails.tokenSymbol);
   }
   
   return headers;
@@ -75,6 +88,12 @@ export function parseX402Response(response: Response): X402PaymentDetails | null
     return null;
   }
   
+  // Parse token-related headers
+  const asset = response.headers.get('X-Payment-Asset') as X402PaymentAsset | null;
+  const tokenAddress = response.headers.get('X-Payment-TokenAddress') as `0x${string}` | null;
+  const tokenDecimalsStr = response.headers.get('X-Payment-TokenDecimals');
+  const tokenSymbol = response.headers.get('X-Payment-TokenSymbol');
+  
   return {
     version: '1',
     network,
@@ -85,6 +104,10 @@ export function parseX402Response(response: Response): X402PaymentDetails | null
     expiry: response.headers.get('X-Payment-Expiry') 
       ? parseInt(response.headers.get('X-Payment-Expiry')!) 
       : undefined,
+    asset: asset || undefined,
+    tokenAddress: tokenAddress || undefined,
+    tokenDecimals: tokenDecimalsStr ? parseInt(tokenDecimalsStr) : undefined,
+    tokenSymbol: tokenSymbol || undefined,
   };
 }
 
