@@ -3,7 +3,7 @@
 import { useAccount } from 'wagmi';
 import { useX402IDRX } from '@/hooks/useX402IDRX';
 import { BASEPAYWALL_ADDRESS } from '@/config/contract';
-import { formatIDRX, DEFAULT_PRICE_IDRX, IDRX_DECIMALS } from '@/config/idrx';
+import { formatIDRX, DEFAULT_PRICE_IDRX, getIDRXAddress } from '@/config/idrx';
 
 function LoadingSpinner() {
   return (
@@ -45,6 +45,10 @@ function IDRXLogo() {
 
 export function X402IDRXDemo() {
   const { isConnected } = useAccount();
+  const network = (process.env.NEXT_PUBLIC_NETWORK as 'base' | 'base-sepolia') || 'base-sepolia';
+  
+  // Hardcoded fallback IDRX address to prevent undefined errors
+  const FALLBACK_IDRX_ADDRESS = '0x18Dd5B087bCA9920562aFf7A0199b96B9230438b' as `0x${string}`;
   
   const {
     status,
@@ -55,7 +59,7 @@ export function X402IDRXDemo() {
     idrxBalance,
     formattedBalance,
     needsApproval,
-    idrxAddress,
+    idrxAddress: hookIdrxAddress,
     fetchContent,
     approve,
     pay,
@@ -69,6 +73,9 @@ export function X402IDRXDemo() {
       console.error('x402 IDRX error:', error);
     },
   });
+
+  // Use hook address if available, otherwise use fallback - ensure never undefined
+  const idrxAddress: `0x${string}` = hookIdrxAddress || getIDRXAddress(network) || FALLBACK_IDRX_ADDRESS;
 
   const priceDisplay = formatIDRX(DEFAULT_PRICE_IDRX);
 
@@ -184,12 +191,12 @@ export function X402IDRXDemo() {
                   rel="noopener noreferrer"
                   className="font-mono text-xs text-blue-400 hover:underline"
                 >
-                  {idrxAddress.slice(0, 10)}...{idrxAddress.slice(-8)}
+                  {idrxAddress?.slice(0, 10)}...{idrxAddress?.slice(-8)}
                 </a>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-500">Pay To:</span>
-                <span className="font-mono text-xs">{paymentDetails.payTo.slice(0, 10)}...{paymentDetails.payTo.slice(-8)}</span>
+                <span className="font-mono text-xs">{paymentDetails.payTo?.slice(0, 10)}...{paymentDetails.payTo?.slice(-8)}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-500">Harga:</span>
