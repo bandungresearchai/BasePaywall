@@ -363,21 +363,8 @@ const navItems: NavItem[] = [
 function Sidebar({ active, onChange }: { active: AppView; onChange: (v: AppView) => void }) {
   return (
     <aside className="space-y-2">
-      {/* Logo Section */}
-      <div className="p-4 mb-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
-            <BaseLogo size={20} />
-          </div>
-          <div>
-            <h3 className="text-base font-bold text-white">BasePaywall</h3>
-            <span className="text-[10px] text-white/30 uppercase tracking-wider">Creator Hub</span>
-          </div>
-        </div>
-      </div>
-
       {/* Navigation */}
-      <nav className="space-y-1 px-2">
+      <nav className="space-y-1 px-2 pt-2">
         {navItems.map((item) => (
           <button
             key={item.key}
