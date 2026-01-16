@@ -1,0 +1,4 @@
+dbe4d7f feat: Add UX improvements, landing page, and wallet fixes
+origin	https://github.com/bandungresearchai/BasePaywall (fetch)
+origin	https://github.com/bandungresearchai/BasePaywall (push)
+?? git_info.txt
