@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   useCreator,
   useCreatorContents,
@@ -23,10 +23,29 @@ function LoadingSpinner() {
   );
 }
 
-// ============ Content Stats Card ============
+// ============ Product Stats Card ============
 
 function ContentStatsCard({ contentId }: { contentId: bigint }) {
   const { priceEth, revenueEth, unlockCount, enabled, creator, isLoading } = useContent(contentId);
+  
+  // Get product metadata from localStorage (demo)
+  const [productMeta, setProductMeta] = useState<{
+    title?: string;
+    category?: string;
+    thumbnailPreview?: string;
+  } | null>(null);
+
+  useEffect(() => {
+    try {
+      const products = JSON.parse(localStorage.getItem('basePaywallProducts') || '[]');
+      const product = products[parseInt(contentId.toString()) - 1];
+      if (product) {
+        setProductMeta(product);
+      }
+    } catch (e) {
+      console.error('Failed to load product metadata:', e);
+    }
+  }, [contentId]);
 
   if (isLoading) {
     return (
@@ -40,31 +59,60 @@ function ContentStatsCard({ contentId }: { contentId: bigint }) {
   if (!creator || creator === '0x0000000000000000000000000000000000000000') {
     return (
       <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700">
-        <p className="text-gray-500 text-center">Content not found</p>
+        <p className="text-gray-500 text-center">Product not found</p>
       </div>
     );
   }
 
+  const categoryEmoji = {
+    template: '📄',
+    asset: '🎨',
+    course: '🎓',
+    ebook: '📚',
+    software: '💻',
+    audio: '🎵',
+    other: '📦',
+  }[productMeta?.category || 'other'] || '📦';
+
   return (
     <div className={`bg-gray-800/50 rounded-xl p-4 border ${enabled ? 'border-gray-700' : 'border-red-500/30'}`}>
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-gray-400 text-sm">Content #{contentId.toString()}</span>
-        <span className={`px-2 py-0.5 rounded text-xs ${enabled ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
-          {enabled ? 'Active' : 'Disabled'}
-        </span>
-      </div>
-      <div className="grid grid-cols-3 gap-4 text-center">
-        <div>
-          <p className="text-gray-500 text-xs">Price</p>
-          <p className="text-white font-medium">{priceEth} ETH</p>
-        </div>
-        <div>
-          <p className="text-gray-500 text-xs">Revenue</p>
-          <p className="text-green-400 font-medium">{revenueEth} ETH</p>
-        </div>
-        <div>
-          <p className="text-gray-500 text-xs">Unlocks</p>
-          <p className="text-base-blue font-medium">{unlockCount}</p>
+      <div className="flex items-start gap-3">
+        {/* Thumbnail */}
+        {productMeta?.thumbnailPreview ? (
+          <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 border border-gray-700">
+            <img src={productMeta.thumbnailPreview} alt="" className="w-full h-full object-cover" />
+          </div>
+        ) : (
+          <div className="w-16 h-16 rounded-lg bg-gray-700 flex items-center justify-center flex-shrink-0 text-2xl">
+            {categoryEmoji}
+          </div>
+        )}
+        
+        {/* Info */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-white font-medium truncate">
+              {productMeta?.title || `Product #${contentId.toString()}`}
+            </span>
+            <span className={`px-2 py-0.5 rounded text-xs flex-shrink-0 ml-2 ${enabled ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+              {enabled ? 'Active' : 'Disabled'}
+            </span>
+          </div>
+          
+          <div className="grid grid-cols-3 gap-2 text-center mt-2">
+            <div className="bg-gray-900/50 rounded px-2 py-1">
+              <p className="text-gray-500 text-xs">Price</p>
+              <p className="text-white font-medium text-sm">{priceEth} ETH</p>
+            </div>
+            <div className="bg-gray-900/50 rounded px-2 py-1">
+              <p className="text-gray-500 text-xs">Revenue</p>
+              <p className="text-green-400 font-medium text-sm">{revenueEth} ETH</p>
+            </div>
+            <div className="bg-gray-900/50 rounded px-2 py-1">
+              <p className="text-gray-500 text-xs">Sales</p>
+              <p className="text-base-blue font-medium text-sm">{unlockCount}</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -92,10 +140,17 @@ function RegistrationSection() {
 
   return (
     <div className="bg-gradient-to-br from-purple-900/30 to-blue-900/30 rounded-xl p-6 border border-purple-500/30">
-      <h4 className="text-lg font-semibold text-white mb-2">Become a Creator</h4>
+      <h4 className="text-lg font-semibold text-white mb-2">Become a Seller</h4>
       <p className="text-gray-400 text-sm mb-4">
-        Register to start creating paywalled content. One-time registration, no fees.
+        Register to start selling digital products. One-time registration, no upfront fees.
+        You only pay a small platform fee when you make a sale.
       </p>
+      <ul className="text-gray-400 text-sm mb-4 space-y-1">
+        <li>✅ Sell unlimited products</li>
+        <li>✅ Get paid instantly in ETH</li>
+        <li>✅ Low platform fee (2.5%)</li>
+        <li>✅ No chargebacks or disputes</li>
+      </ul>
       <button
         onClick={register}
         disabled={isPending || isConfirming}
@@ -108,8 +163,8 @@ function RegistrationSection() {
           </>
         ) : (
           <>
-            <span>✨</span>
-            <span>Register as Creator</span>
+            <span>🚀</span>
+            <span>Start Selling</span>
           </>
         )}
       </button>
@@ -117,30 +172,229 @@ function RegistrationSection() {
         <p className="text-red-400 text-sm mt-2 text-center">{error}</p>
       )}
       {isSuccess && (
-        <p className="text-green-400 text-sm mt-2 text-center">✅ Successfully registered as creator!</p>
+        <p className="text-green-400 text-sm mt-2 text-center">✅ You're now a verified seller!</p>
       )}
     </div>
   );
 }
 
-// ============ Create Content Form ============
+// ============ Product Categories ============
+
+const PRODUCT_CATEGORIES = [
+  { value: 'template', label: '📄 Template', description: 'Design templates, code templates' },
+  { value: 'asset', label: '🎨 Asset Pack', description: 'Icons, illustrations, 3D models' },
+  { value: 'course', label: '🎓 Course', description: 'Video courses, tutorials' },
+  { value: 'ebook', label: '📚 eBook', description: 'PDF books, guides, documentation' },
+  { value: 'software', label: '💻 Software', description: 'Tools, plugins, scripts' },
+  { value: 'audio', label: '🎵 Audio', description: 'Music, sound effects, podcasts' },
+  { value: 'other', label: '📦 Other', description: 'Other digital products' },
+];
+
+// ============ Create Product Form ============
 
 function CreateContentForm() {
   const [price, setPrice] = useState('0.001');
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [category, setCategory] = useState('template');
+  const [productFile, setProductFile] = useState<File | null>(null);
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [productUrl, setProductUrl] = useState('');
+  const [thumbnailUrl, setThumbnailUrl] = useState('');
+  
   const { createContent, isPending, isConfirming, isSuccess, hash, error } = useCreateContent();
   const { getTransactionUrl } = useExplorer();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Handle thumbnail preview
+  const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setThumbnailFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setThumbnailPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Handle product file
+  const handleProductFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setProductFile(file);
+    }
+  };
+
+  // Simulate file upload (in production, use IPFS/Pinata/Arweave)
+  const uploadFiles = async () => {
+    setIsUploading(true);
+    setUploadProgress(0);
+
+    try {
+      // Simulate upload progress
+      for (let i = 0; i <= 100; i += 10) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        setUploadProgress(i);
+      }
+
+      // In production, replace with actual IPFS upload:
+      // const productCID = await uploadToIPFS(productFile);
+      // const thumbnailCID = await uploadToIPFS(thumbnailFile);
+      
+      // For demo, we'll store metadata in localStorage
+      const productId = Date.now().toString();
+      const metadata = {
+        id: productId,
+        title,
+        description,
+        category,
+        productFileName: productFile?.name || '',
+        thumbnailPreview: thumbnailPreview || '',
+        createdAt: new Date().toISOString(),
+      };
+      
+      // Store in localStorage (demo only - use IPFS in production)
+      const existingProducts = JSON.parse(localStorage.getItem('basePaywallProducts') || '[]');
+      existingProducts.push(metadata);
+      localStorage.setItem('basePaywallProducts', JSON.stringify(existingProducts));
+
+      setProductUrl(`local://${productId}`);
+      setThumbnailUrl(thumbnailPreview || '');
+      
+      return true;
+    } catch (err) {
+      console.error('Upload failed:', err);
+      return false;
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!price) return;
+    if (!price || !title) return;
+
+    // Upload files first if provided
+    if (productFile || thumbnailFile) {
+      const uploaded = await uploadFiles();
+      if (!uploaded) return;
+    }
+
+    // Create on-chain content entry
     createContent(price);
   };
 
+  const isFormValid = title && price && parseFloat(price) >= 0.0001;
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <h4 className="text-lg font-semibold text-white">Create New Content</h4>
+      <h4 className="text-lg font-semibold text-white flex items-center gap-2">
+        <span>🛍️</span>
+        Create New Product
+      </h4>
+
+      {/* Product Title */}
       <div>
-        <label className="block text-sm text-gray-400 mb-1">Price (ETH)</label>
+        <label className="block text-sm text-gray-400 mb-1">Product Title *</label>
+        <input
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-base-blue"
+          placeholder="e.g., Premium React Component Kit"
+          maxLength={100}
+        />
+      </div>
+
+      {/* Description */}
+      <div>
+        <label className="block text-sm text-gray-400 mb-1">Description</label>
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-base-blue resize-none"
+          placeholder="Describe your product..."
+          rows={3}
+          maxLength={500}
+        />
+        <p className="text-xs text-gray-500 mt-1">{description.length}/500 characters</p>
+      </div>
+
+      {/* Category */}
+      <div>
+        <label className="block text-sm text-gray-400 mb-1">Category</label>
+        <select
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-base-blue"
+        >
+          {PRODUCT_CATEGORIES.map((cat) => (
+            <option key={cat.value} value={cat.value}>
+              {cat.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Thumbnail Upload */}
+      <div>
+        <label className="block text-sm text-gray-400 mb-1">Product Thumbnail</label>
+        <div className="flex items-start gap-4">
+          <div className="flex-1">
+            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-700 border-dashed rounded-lg cursor-pointer bg-gray-800/50 hover:bg-gray-800 transition-colors">
+              <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                <span className="text-2xl mb-2">🖼️</span>
+                <p className="text-sm text-gray-400">
+                  {thumbnailFile ? thumbnailFile.name : 'Click to upload thumbnail'}
+                </p>
+                <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
+              </div>
+              <input
+                type="file"
+                className="hidden"
+                accept="image/*"
+                onChange={handleThumbnailChange}
+              />
+            </label>
+          </div>
+          {thumbnailPreview && (
+            <div className="w-32 h-32 rounded-lg overflow-hidden border border-gray-700">
+              <img src={thumbnailPreview} alt="Preview" className="w-full h-full object-cover" />
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Product File Upload */}
+      <div>
+        <label className="block text-sm text-gray-400 mb-1">Product File *</label>
+        <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-700 border-dashed rounded-lg cursor-pointer bg-gray-800/50 hover:bg-gray-800 transition-colors">
+          <div className="flex flex-col items-center justify-center pt-5 pb-6">
+            <span className="text-2xl mb-2">📁</span>
+            <p className="text-sm text-gray-400">
+              {productFile ? (
+                <span className="text-green-400">✓ {productFile.name} ({(productFile.size / 1024 / 1024).toFixed(2)} MB)</span>
+              ) : (
+                'Click to upload product file'
+              )}
+            </p>
+            <p className="text-xs text-gray-500">ZIP, PDF, or any file up to 100MB</p>
+          </div>
+          <input
+            type="file"
+            className="hidden"
+            onChange={handleProductFileChange}
+          />
+        </label>
+      </div>
+
+      {/* Price */}
+      <div>
+        <label className="block text-sm text-gray-400 mb-1">Price (ETH) *</label>
         <input
           type="number"
           step="0.0001"
@@ -151,34 +405,69 @@ function CreateContentForm() {
           className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-base-blue"
           placeholder="0.001"
         />
-        <p className="text-xs text-gray-500 mt-1">Min: 0.0001 ETH • Max: 10 ETH</p>
+        <p className="text-xs text-gray-500 mt-1">Min: 0.0001 ETH (~$0.25) • Max: 10 ETH</p>
       </div>
+
+      {/* Upload Progress */}
+      {isUploading && (
+        <div className="bg-gray-800/50 rounded-lg p-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm text-gray-400">Uploading files...</span>
+            <span className="text-sm text-base-blue">{uploadProgress}%</span>
+          </div>
+          <div className="w-full bg-gray-700 rounded-full h-2">
+            <div
+              className="bg-base-blue h-2 rounded-full transition-all duration-300"
+              style={{ width: `${uploadProgress}%` }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Submit Button */}
       <button
         type="submit"
-        disabled={isPending || isConfirming || !price}
+        disabled={isPending || isConfirming || isUploading || !isFormValid}
         className="btn btn-primary w-full"
       >
-        {isPending || isConfirming ? (
+        {isUploading ? (
+          <>
+            <LoadingSpinner />
+            <span>Uploading...</span>
+          </>
+        ) : isPending || isConfirming ? (
           <>
             <LoadingSpinner />
             <span>{isPending ? 'Confirm in Wallet' : 'Creating...'}</span>
           </>
         ) : (
           <>
-            <span>➕</span>
-            <span>Create Content</span>
+            <span>🚀</span>
+            <span>Publish Product</span>
           </>
         )}
       </button>
+
+      {/* Success Message */}
       {isSuccess && hash && (
-        <div className="text-green-400 text-sm text-center">
-          ✅ Content created!{' '}
-          <a href={getTransactionUrl(hash)} target="_blank" rel="noopener noreferrer" className="underline">
-            View tx
-          </a>
+        <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4">
+          <p className="text-green-400 text-sm text-center">
+            ✅ Product published successfully!{' '}
+            <a href={getTransactionUrl(hash)} target="_blank" rel="noopener noreferrer" className="underline">
+              View transaction
+            </a>
+          </p>
+          <p className="text-gray-400 text-xs text-center mt-1">
+            Your product is now available for purchase
+          </p>
         </div>
       )}
-      {error && <p className="text-red-400 text-sm text-center">{error}</p>}
+
+      {error && (
+        <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
+          <p className="text-red-400 text-sm text-center">{error}</p>
+        </div>
+      )}
     </form>
   );
 }
@@ -364,11 +653,11 @@ function CreatorStatsOverview() {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
       <div className="bg-gray-800/50 rounded-xl p-4 text-center">
-        <p className="text-gray-500 text-xs">Content Items</p>
+        <p className="text-gray-500 text-xs">Products</p>
         <p className="text-2xl font-bold text-white">{contentCount}</p>
       </div>
       <div className="bg-gray-800/50 rounded-xl p-4 text-center">
-        <p className="text-gray-500 text-xs">Total Revenue</p>
+        <p className="text-gray-500 text-xs">Total Sales</p>
         <p className="text-2xl font-bold text-green-400">{totalRevenueEth} ETH</p>
       </div>
       <div className="bg-gray-800/50 rounded-xl p-4 text-center">
@@ -393,9 +682,9 @@ export function CreatorDashboardV2() {
     return (
       <div className="card p-8">
         <div className="text-center">
-          <span className="text-4xl mb-4 block">👩‍🎨</span>
-          <h3 className="text-xl font-bold text-white mb-2">Creator Dashboard</h3>
-          <p className="text-gray-400">Connect your wallet to access the creator dashboard</p>
+          <span className="text-4xl mb-4 block">🛍️</span>
+          <h3 className="text-xl font-bold text-white mb-2">Seller Dashboard</h3>
+          <p className="text-gray-400">Connect your wallet to start selling digital products</p>
         </div>
       </div>
     );
@@ -406,7 +695,7 @@ export function CreatorDashboardV2() {
       <div className="card p-8">
         <div className="flex items-center justify-center space-x-2">
           <LoadingSpinner />
-          <span className="text-gray-400">Loading creator data...</span>
+          <span className="text-gray-400">Loading seller data...</span>
         </div>
       </div>
     );
@@ -417,8 +706,8 @@ export function CreatorDashboardV2() {
     return (
       <div className="card p-8">
         <div className="flex items-center space-x-3 mb-6">
-          <span className="text-2xl">👩‍🎨</span>
-          <h3 className="text-2xl font-bold text-white">Creator Dashboard</h3>
+          <span className="text-2xl">🛍️</span>
+          <h3 className="text-2xl font-bold text-white">Seller Dashboard</h3>
         </div>
         <RegistrationSection />
       </div>
@@ -428,9 +717,9 @@ export function CreatorDashboardV2() {
   return (
     <div className="card p-8">
       <div className="flex items-center space-x-3 mb-6">
-        <span className="text-2xl">👩‍🎨</span>
-        <h3 className="text-2xl font-bold text-white">Creator Dashboard</h3>
-        <span className="bg-green-500/20 text-green-400 px-2 py-0.5 rounded text-xs">Registered</span>
+        <span className="text-2xl">🛍️</span>
+        <h3 className="text-2xl font-bold text-white">Seller Dashboard</h3>
+        <span className="bg-green-500/20 text-green-400 px-2 py-0.5 rounded text-xs">Verified Seller</span>
       </div>
 
       {/* Stats Overview */}
@@ -444,11 +733,11 @@ export function CreatorDashboardV2() {
           <UpdateContentForm />
         </div>
 
-        {/* Right Column - Withdraw & Content List */}
+        {/* Right Column - Withdraw & Product List */}
         <div className="space-y-8">
           <WithdrawSection />
           <div>
-            <h4 className="text-lg font-semibold text-white mb-4">Your Content</h4>
+            <h4 className="text-lg font-semibold text-white mb-4">Your Products</h4>
             <CreatorContentList />
           </div>
         </div>

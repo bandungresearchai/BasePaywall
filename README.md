@@ -9,14 +9,33 @@ BasePaywall is an on-chain content paywall that implements the HTTP 402 "Payment
 ![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat&logo=nextdotjs&logoColor=white)
 ![OnchainKit](https://img.shields.io/badge/OnchainKit-0052FF?style=flat&logo=coinbase&logoColor=white)
 
+## 📚 Documentation
+
+| Document | Description |
+|----------|-------------|
+| [**Target Users**](./docs/TARGET_USERS.md) | Who should use BasePaywall — creators, developers, platforms |
+| [**Integration Guide**](./docs/INTEGRATION.md) | Drop-in paywall for websites, APIs, and applications |
+| [**Extensibility Roadmap**](./docs/EXTENSIBILITY.md) | Future features: time-limited access, NFTs, tiers, subscriptions |
+
 ## 🌟 Features
 
 - **On-Chain Payment Tracking**: All payments recorded immutably on Base blockchain
 - **One-Time Payment**: Pay once, access forever—no subscriptions
 - **Wallet Integration**: Seamless connection with Coinbase Wallet and other Web3 wallets
 - **HTTP 402 Model**: Implements the "Payment Required" standard for web monetization
-- **Low Gas Fees**: Built on Base L2 for minimal transaction costs
+- **Low Gas Fees**: Built on Base L2 for minimal transaction costs (~$0.001-0.01)
 - **Owner Controls**: Content creators can update content and withdraw funds
+- **Multi-Tenant (V2)**: Platform for multiple creators with configurable fees
+- **x402 Protocol**: Drop-in middleware for API monetization
+
+## 🎯 Who Is This For?
+
+| User Type | Use Case | Learn More |
+|-----------|----------|------------|
+| **Independent Creators** | Monetize blogs, articles, research reports | [Target Users](./docs/TARGET_USERS.md#1-independent-content-creators) |
+| **API Developers** | Pay-per-access APIs without Stripe/auth overhead | [Target Users](./docs/TARGET_USERS.md#2-api--developer-tool-providers) |
+| **Digital Sellers** | Sell templates, courses, eBooks with crypto | [Target Users](./docs/TARGET_USERS.md#3-digital-product-sellers) |
+| **Platform Builders** | Add paywall features to your product | [Integration Guide](./docs/INTEGRATION.md) |
 
 ## 🏗️ Architecture
 
@@ -133,6 +152,45 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+## ⚡ Quick Integration
+
+For detailed integration patterns, see [**INTEGRATION.md**](./docs/INTEGRATION.md).
+
+### React Component (2 minutes)
+
+```tsx
+import { PaywallContent } from '@/components/PaywallContent';
+
+export default function PremiumPage() {
+  return (
+    <PaywallContent
+      contentId={1}
+      previewContent="This is a preview..."
+      premiumContent="Full premium content unlocked!"
+    />
+  );
+}
+```
+
+### API Route with x402 (3 minutes)
+
+```typescript
+import { createX402Middleware } from '@/lib/x402';
+
+const x402 = createX402Middleware({
+  payTo: '0xYourWallet',
+  amount: '1000000000000000', // 0.001 ETH
+  network: 'base-sepolia',
+  resource: '/api/premium',
+});
+
+export async function GET(request: NextRequest) {
+  return x402(request, async () => {
+    return NextResponse.json({ data: 'Premium content' });
+  });
+}
+```
+
 ## ⚙️ Configuration
 
 ### Smart Contract Environment (contracts/.env)
@@ -170,6 +228,8 @@ NEXT_PUBLIC_NETWORK="sepolia"
 
 ## 🔗 Contract Functions
 
+### V1 (Single Creator)
+
 | Function | Description |
 |----------|-------------|
 | `pay()` | Pay to unlock content (requires PRICE wei) |
@@ -178,6 +238,18 @@ NEXT_PUBLIC_NETWORK="sepolia"
 | `getPrice()` | Get the unlock price in wei |
 | `setContent(string)` | Update locked content (owner only) |
 | `withdraw()` | Withdraw accumulated funds (owner only) |
+
+### V2 (Multi-Tenant Platform)
+
+| Function | Description |
+|----------|-------------|
+| `registerCreator()` | Self-register as a content creator |
+| `createContent(price)` | Create new paywalled content |
+| `updateContent(id, price, enabled)` | Update content settings |
+| `unlock(contentId)` | Pay to unlock specific content |
+| `checkAccess(contentId, user)` | Check if user has access |
+| `withdrawCreatorBalance()` | Creator withdraws earnings |
+| `withdrawPlatformBalance()` | Platform owner withdraws fees |
 
 ## 🌐 Deployment
 
@@ -232,13 +304,24 @@ npm run build
 
 ## 🗺️ Roadmap
 
-- [ ] Multi-tier pricing support
-- [ ] NFT-based access tokens
-- [ ] ERC-20 token payments
-- [ ] Time-limited access
-- [ ] Content encryption
-- [ ] Creator dashboard
-- [ ] Revenue sharing
+See [**EXTENSIBILITY.md**](./docs/EXTENSIBILITY.md) for the full roadmap and technical designs.
+
+### Upcoming Features
+
+| Version | Feature | Status |
+|---------|---------|--------|
+| v2.1 | Time-Limited Access | 🟡 Q1 2026 |
+| v2.2 | NFT Access Tokens | 🟡 Q2 2026 |
+| v2.2 | USDC Payments | 🟡 Q2 2026 |
+| v2.3 | Tiered Content & Bundles | 🟠 Q3 2026 |
+| v3.0 | Subscription Model | 🔴 Q4 2026 |
+| v3.1 | Content Encryption | 🔴 Q4 2026 |
+
+### Already Implemented
+- ✅ Multi-tenant creator platform (V2)
+- ✅ IDRX stablecoin support
+- ✅ x402 protocol middleware
+- ✅ Creator dashboards & analytics
 
 ## 🤝 Contributing
 
@@ -307,6 +390,10 @@ BasePaywall implements the HTTP 402 "Payment Required" model on Base L2:
 - **GitHub**: https://github.com/bandungresearchai/BasePaywall
 - **Live Demo**: [Your Vercel URL]
 - **Contract**: [Your Base Sepolia Contract Address]
+- **Documentation**:
+  - [Target Users](./docs/TARGET_USERS.md)
+  - [Integration Guide](./docs/INTEGRATION.md)
+  - [Extensibility Roadmap](./docs/EXTENSIBILITY.md)
 
 ---
 
