@@ -475,6 +475,13 @@ export default function HomeV2() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <a 
+              href="/marketplace" 
+              className="hidden sm:flex items-center gap-2 px-4 py-2 bg-purple-600/20 border border-purple-500/30 rounded-xl text-purple-400 hover:bg-purple-600/30 transition-colors text-sm"
+            >
+              <span>🏪</span>
+              <span>Marketplace</span>
+            </a>
             <WalletAddress />
             <WalletConnect />
           </div>

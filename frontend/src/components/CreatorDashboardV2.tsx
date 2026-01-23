@@ -10,9 +10,17 @@ import {
   useUpdateContent,
   useCreatorWithdraw,
   usePlatformFee,
+  useNextContentId,
 } from '@/hooks/usePaywallV2';
 import { useExplorer } from '@/hooks/useNetwork';
 import { useAccount } from 'wagmi';
+import { 
+  uploadToIPFS, 
+  uploadMetadataToIPFS, 
+  storeProductLocal,
+  isIPFSConfigured,
+  type ProductMetadata 
+} from '@/lib/ipfs';
 
 function LoadingSpinner() {
   return (
@@ -28,19 +36,34 @@ function LoadingSpinner() {
 function ContentStatsCard({ contentId }: { contentId: bigint }) {
   const { priceEth, revenueEth, unlockCount, enabled, creator, isLoading } = useContent(contentId);
   
-  // Get product metadata from localStorage (demo)
+  // Get product metadata from storage
   const [productMeta, setProductMeta] = useState<{
     title?: string;
     category?: string;
-    thumbnailPreview?: string;
+    thumbnailCID?: string;
   } | null>(null);
 
   useEffect(() => {
+    const id = contentId.toString();
     try {
-      const products = JSON.parse(localStorage.getItem('basePaywallProducts') || '[]');
-      const product = products[parseInt(contentId.toString()) - 1];
-      if (product) {
-        setProductMeta(product);
+      // Try new format first (object by contentId)
+      const productsObj = JSON.parse(localStorage.getItem('basePaywallProducts') || '{}');
+      if (productsObj[id]) {
+        setProductMeta(productsObj[id]);
+        return;
+      }
+      
+      // Fallback to old array format
+      const productsArr = JSON.parse(localStorage.getItem('basePaywallProducts') || '[]');
+      if (Array.isArray(productsArr)) {
+        const product = productsArr[parseInt(id) - 1];
+        if (product) {
+          setProductMeta({
+            title: product.title,
+            category: product.category,
+            thumbnailCID: product.thumbnailPreview,
+          });
+        }
       }
     } catch (e) {
       console.error('Failed to load product metadata:', e);
@@ -78,9 +101,9 @@ function ContentStatsCard({ contentId }: { contentId: bigint }) {
     <div className={`bg-gray-800/50 rounded-xl p-4 border ${enabled ? 'border-gray-700' : 'border-red-500/30'}`}>
       <div className="flex items-start gap-3">
         {/* Thumbnail */}
-        {productMeta?.thumbnailPreview ? (
+        {productMeta?.thumbnailCID ? (
           <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 border border-gray-700">
-            <img src={productMeta.thumbnailPreview} alt="" className="w-full h-full object-cover" />
+            <img src={productMeta.thumbnailCID} alt="" className="w-full h-full object-cover" />
           </div>
         ) : (
           <div className="w-16 h-16 rounded-lg bg-gray-700 flex items-center justify-center flex-shrink-0 text-2xl">
@@ -229,42 +252,84 @@ function CreateContentForm() {
     }
   };
 
-  // Simulate file upload (in production, use IPFS/Pinata/Arweave)
-  const uploadFiles = async () => {
+  // Upload files to IPFS (or localStorage for demo)
+  const uploadFiles = async (contentId: string) => {
     setIsUploading(true);
     setUploadProgress(0);
 
     try {
-      // Simulate upload progress
-      for (let i = 0; i <= 100; i += 10) {
-        await new Promise(resolve => setTimeout(resolve, 100));
-        setUploadProgress(i);
+      let thumbnailCID = '';
+      let productFileCID = '';
+
+      // Check if IPFS is configured
+      const useIPFS = isIPFSConfigured();
+
+      if (useIPFS) {
+        // Upload thumbnail to IPFS
+        if (thumbnailFile) {
+          setUploadProgress(20);
+          const thumbnailResult = await uploadToIPFS(thumbnailFile, `thumbnail-${contentId}`);
+          if (thumbnailResult.success && thumbnailResult.cid) {
+            thumbnailCID = thumbnailResult.cid;
+          }
+        }
+
+        // Upload product file to IPFS
+        if (productFile) {
+          setUploadProgress(50);
+          const productResult = await uploadToIPFS(productFile, `product-${contentId}`);
+          if (productResult.success && productResult.cid) {
+            productFileCID = productResult.cid;
+          }
+        }
+
+        setUploadProgress(80);
+
+        // Create and upload metadata to IPFS
+        const metadata: ProductMetadata = {
+          title,
+          description,
+          category,
+          price,
+          thumbnailCID,
+          productFileCID,
+          productFileName: productFile?.name || '',
+          creatorAddress: '', // Will be set by contract
+          contentId,
+          createdAt: new Date().toISOString(),
+        };
+
+        const metadataResult = await uploadMetadataToIPFS(metadata);
+        if (metadataResult.success) {
+          setProductUrl(metadataResult.url || '');
+          setThumbnailUrl(thumbnailCID ? `ipfs://${thumbnailCID}` : '');
+        }
+      } else {
+        // Demo mode: use localStorage
+        for (let i = 0; i <= 80; i += 10) {
+          await new Promise(resolve => setTimeout(resolve, 50));
+          setUploadProgress(i);
+        }
+
+        const metadata: ProductMetadata = {
+          title,
+          description,
+          category,
+          price,
+          thumbnailCID: thumbnailPreview || '', // Use base64 for demo
+          productFileName: productFile?.name || '',
+          creatorAddress: '',
+          contentId,
+          createdAt: new Date().toISOString(),
+        };
+
+        // Store in localStorage
+        storeProductLocal(contentId, metadata);
+        setProductUrl(`local://${contentId}`);
+        setThumbnailUrl(thumbnailPreview || '');
       }
-
-      // In production, replace with actual IPFS upload:
-      // const productCID = await uploadToIPFS(productFile);
-      // const thumbnailCID = await uploadToIPFS(thumbnailFile);
       
-      // For demo, we'll store metadata in localStorage
-      const productId = Date.now().toString();
-      const metadata = {
-        id: productId,
-        title,
-        description,
-        category,
-        productFileName: productFile?.name || '',
-        thumbnailPreview: thumbnailPreview || '',
-        createdAt: new Date().toISOString(),
-      };
-      
-      // Store in localStorage (demo only - use IPFS in production)
-      const existingProducts = JSON.parse(localStorage.getItem('basePaywallProducts') || '[]');
-      existingProducts.push(metadata);
-      localStorage.setItem('basePaywallProducts', JSON.stringify(existingProducts));
-
-      setProductUrl(`local://${productId}`);
-      setThumbnailUrl(thumbnailPreview || '');
-      
+      setUploadProgress(100);
       return true;
     } catch (err) {
       console.error('Upload failed:', err);
@@ -278,9 +343,12 @@ function CreateContentForm() {
     e.preventDefault();
     if (!price || !title) return;
 
+    // Get next content ID for metadata storage
+    const nextId = Date.now().toString(); // Temporary ID, will be updated after creation
+
     // Upload files first if provided
     if (productFile || thumbnailFile) {
-      const uploaded = await uploadFiles();
+      const uploaded = await uploadFiles(nextId);
       if (!uploaded) return;
     }
 
