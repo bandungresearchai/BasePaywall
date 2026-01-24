@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { WalletOnlyConnect } from '@/components/WalletOnlyConnect';
 import { PaywallContentV2 } from '@/components/PaywallContentV2';
 import { NetworkGuard } from '@/components/NetworkGuard';
@@ -1440,6 +1441,68 @@ function Sidebar({ active, onChange }: { active: AppView; onChange: (v: AppView)
           </button>
         ))}
       </nav>
+
+      {/* V3 & V4 Links */}
+      <div className="px-4 pt-4">
+        <div className={`text-[10px] uppercase tracking-wider font-medium mb-2 ${theme === 'dark' ? 'text-white/30' : 'text-gray-400'}`}>
+          New Features
+        </div>
+        <div className="space-y-1">
+          <Link href="/v3">
+            <div className={`flex items-center gap-3 px-3 py-2 rounded-xl transition-all group ${
+              theme === 'dark'
+                ? 'hover:bg-emerald-500/10 border border-transparent hover:border-emerald-500/30'
+                : 'hover:bg-emerald-50 border border-transparent hover:border-emerald-200'
+            }`}>
+              <span className="text-lg">⏱️</span>
+              <div className="flex-1 min-w-0">
+                <p className={`text-sm font-medium ${theme === 'dark' ? 'text-white/70' : 'text-gray-700'}`}>Time-Limited</p>
+                <p className={`text-[10px] ${theme === 'dark' ? 'text-white/30' : 'text-gray-400'}`}>V3 Rental Model</p>
+              </div>
+              <span className="px-1.5 py-0.5 text-[9px] bg-emerald-500/20 text-emerald-400 rounded-full">NEW</span>
+            </div>
+          </Link>
+          <Link href="/v4">
+            <div className={`flex items-center gap-3 px-3 py-2 rounded-xl transition-all group ${
+              theme === 'dark'
+                ? 'hover:bg-violet-500/10 border border-transparent hover:border-violet-500/30'
+                : 'hover:bg-violet-50 border border-transparent hover:border-violet-200'
+            }`}>
+              <span className="text-lg">🎨</span>
+              <div className="flex-1 min-w-0">
+                <p className={`text-sm font-medium ${theme === 'dark' ? 'text-white/70' : 'text-gray-700'}`}>NFT Access</p>
+                <p className={`text-[10px] ${theme === 'dark' ? 'text-white/30' : 'text-gray-400'}`}>V4 Tokens</p>
+              </div>
+              <span className="px-1.5 py-0.5 text-[9px] bg-violet-500/20 text-violet-400 rounded-full">BETA</span>
+            </div>
+          </Link>
+        </div>
+      </div>
+
+      {/* Quick Links */}
+      <div className="px-4 pt-4">
+        <div className={`text-[10px] uppercase tracking-wider font-medium mb-2 ${theme === 'dark' ? 'text-white/30' : 'text-gray-400'}`}>
+          Resources
+        </div>
+        <div className="space-y-1">
+          <Link href="/landing">
+            <div className={`flex items-center gap-3 px-3 py-2 rounded-xl transition-all ${
+              theme === 'dark' ? 'hover:bg-white/[0.03]' : 'hover:bg-gray-100'
+            }`}>
+              <span className="text-lg">🏠</span>
+              <span className={`text-sm ${theme === 'dark' ? 'text-white/50' : 'text-gray-600'}`}>Landing Page</span>
+            </div>
+          </Link>
+          <Link href="/docs">
+            <div className={`flex items-center gap-3 px-3 py-2 rounded-xl transition-all ${
+              theme === 'dark' ? 'hover:bg-white/[0.03]' : 'hover:bg-gray-100'
+            }`}>
+              <span className="text-lg">📖</span>
+              <span className={`text-sm ${theme === 'dark' ? 'text-white/50' : 'text-gray-600'}`}>Documentation</span>
+            </div>
+          </Link>
+        </div>
+      </div>
 
       {/* Network Badge */}
       <div className="px-4 pt-6">

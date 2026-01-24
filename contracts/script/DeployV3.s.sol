@@ -31,9 +31,6 @@ contract DeployV3 is Script {
         console.log("");
         console.log("=== Deployment Complete ===");
         console.log("Contract Address:", address(paywall));
-        console.log("");
-        console.log("Verify with:");
-        console.log("  forge verify-contract", address(paywall), "src/BasePaywallV3.sol:BasePaywallV3 --constructor-args $(cast abi-encode 'constructor(address,uint256)' ", owner, platformFeeBps, ")");
         
         return paywall;
     }

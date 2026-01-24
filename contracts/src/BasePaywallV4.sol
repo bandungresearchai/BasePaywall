@@ -155,6 +155,25 @@ contract BasePaywallV4 is ERC721Enumerable, Ownable, ReentrancyGuard, Pausable {
         uint256 royaltyBps,
         string calldata metadataURI
     ) external whenNotPaused returns (uint256 contentId) {
+        return _createContent(price, maxSupply, royaltyBps, metadataURI);
+    }
+    
+    /**
+     * @notice Create content with defaults (unlimited supply, no royalty)
+     */
+    function createContent(uint256 price) external whenNotPaused returns (uint256 contentId) {
+        return _createContent(price, 0, 0, "");
+    }
+
+    /**
+     * @notice Internal function to create content
+     */
+    function _createContent(
+        uint256 price, 
+        uint256 maxSupply,
+        uint256 royaltyBps,
+        string memory metadataURI
+    ) internal returns (uint256 contentId) {
         if (!creators[msg.sender].isRegistered) {
             revert NotRegistered();
         }
@@ -183,13 +202,6 @@ contract BasePaywallV4 is ERC721Enumerable, Ownable, ReentrancyGuard, Pausable {
         _creatorContents[msg.sender].push(contentId);
         
         emit ContentCreated(msg.sender, contentId, price, maxSupply);
-    }
-    
-    /**
-     * @notice Create content with defaults (unlimited supply, no royalty)
-     */
-    function createContent(uint256 price) external whenNotPaused returns (uint256 contentId) {
-        return this.createContent(price, 0, 0, "");
     }
 
     function updateContent(uint256 contentId, uint256 price, bool enabled) external whenNotPaused {

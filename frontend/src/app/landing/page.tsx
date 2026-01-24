@@ -1,160 +1,36 @@
 'use client';
 
-import { useRef, ReactNode } from 'react';
-import { motion, useInView } from 'framer-motion';
+import { useRef, ReactNode, useState } from 'react';
+import { motion, useInView, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 
-// ==================== CSS Animated Hero ====================
+// ==================== Modern Landing Page 2026 ====================
 
-function AnimatedHero() {
+// Animated gradient orbs background
+function GradientOrbs() {
   return (
-    <div className="relative w-full h-full overflow-hidden">
-      {/* Animated gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 via-purple-600/10 to-cyan-600/20 animate-gradient" />
-      
-      {/* Floating cards */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        {/* Central lock icon */}
-        <motion.div 
-          className="relative z-10"
-          animate={{ 
-            y: [0, -10, 0],
-            rotateY: [0, 5, 0, -5, 0]
-          }}
-          transition={{ 
-            duration: 6, 
-            repeat: Infinity, 
-            ease: "easeInOut" 
-          }}
-        >
-          <div className="w-32 h-32 md:w-40 md:h-40 rounded-3xl bg-gradient-to-br from-blue-400 to-blue-600 shadow-2xl shadow-blue-500/30 flex items-center justify-center backdrop-blur-sm border border-white/20">
-            <motion.div
-              animate={{ scale: [1, 1.1, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            >
-              <svg className="w-16 h-16 md:w-20 md:h-20 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-              </svg>
-            </motion.div>
-          </div>
-          
-          {/* Glow effect */}
-          <div className="absolute inset-0 rounded-3xl bg-blue-500/20 blur-xl -z-10 animate-pulse" />
-        </motion.div>
-
-        {/* Floating content cards */}
-        {[
-          { x: -180, y: -80, delay: 0, size: 'w-24 h-16 md:w-32 md:h-20' },
-          { x: 160, y: -60, delay: 0.5, size: 'w-28 h-18 md:w-36 md:h-22' },
-          { x: -150, y: 100, delay: 1, size: 'w-20 h-14 md:w-28 md:h-18' },
-          { x: 140, y: 90, delay: 1.5, size: 'w-26 h-16 md:w-32 md:h-20' },
-          { x: 0, y: -140, delay: 2, size: 'w-22 h-14 md:w-28 md:h-18' },
-        ].map((card, i) => (
-          <motion.div
-            key={i}
-            className={`absolute ${card.size} rounded-xl bg-white/90 backdrop-blur-sm shadow-lg border border-white/50`}
-            style={{ left: `calc(50% + ${card.x}px)`, top: `calc(50% + ${card.y}px)` }}
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ 
-              opacity: 1, 
-              scale: 1,
-              y: [0, -8, 0],
-              rotate: [0, 2, 0, -2, 0]
-            }}
-            transition={{ 
-              delay: card.delay,
-              duration: 4 + i * 0.5,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-          >
-            <div className="p-2 md:p-3 space-y-1.5">
-              <div className="h-2 bg-gray-200 rounded w-3/4" />
-              <div className="h-1.5 bg-gray-100 rounded w-full" />
-              <div className="h-1.5 bg-gray-100 rounded w-2/3" />
-            </div>
-          </motion.div>
-        ))}
-
-        {/* Sparkles */}
-        {[...Array(6)].map((_, i) => (
-          <motion.div
-            key={`sparkle-${i}`}
-            className="absolute w-2 h-2 bg-blue-400 rounded-full"
-            style={{
-              left: `${20 + i * 15}%`,
-              top: `${30 + (i % 3) * 20}%`,
-            }}
-            animate={{
-              opacity: [0, 1, 0],
-              scale: [0, 1, 0],
-            }}
-            transition={{
-              duration: 2,
-              delay: i * 0.3,
-              repeat: Infinity,
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Animated rings */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        {[1, 2, 3].map((ring) => (
-          <motion.div
-            key={ring}
-            className="absolute rounded-full border border-blue-400/20"
-            style={{
-              width: `${200 + ring * 100}px`,
-              height: `${200 + ring * 100}px`,
-            }}
-            animate={{
-              scale: [1, 1.1, 1],
-              opacity: [0.3, 0.1, 0.3],
-            }}
-            transition={{
-              duration: 3,
-              delay: ring * 0.5,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          />
-        ))}
-      </div>
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500/30 rounded-full blur-[100px] animate-pulse" />
+      <div className="absolute top-1/2 -left-40 w-96 h-96 bg-purple-500/20 rounded-full blur-[120px] animate-pulse delay-1000" />
+      <div className="absolute -bottom-40 right-1/4 w-80 h-80 bg-cyan-500/25 rounded-full blur-[100px] animate-pulse delay-500" />
     </div>
   );
 }
 
-// ==================== UI Components ====================
-
-function FadeInSection({ children, className = '', delay = 0 }: { 
-  children: ReactNode; 
-  className?: string;
-  delay?: number;
-}) {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '-100px' });
-
+// Grid pattern background
+function GridPattern() {
   return (
-    <motion.div
-      ref={ref}
-      className={className}
-      initial={{ opacity: 0, y: 40 }}
-      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
-      transition={{ duration: 0.6, delay, ease: [0.25, 0.1, 0.25, 1] }}
-    >
-      {children}
-    </motion.div>
+    <div className="absolute inset-0 pointer-events-none opacity-[0.03]">
+      <div className="w-full h-full" style={{
+        backgroundImage: `linear-gradient(to right, white 1px, transparent 1px), linear-gradient(to bottom, white 1px, transparent 1px)`,
+        backgroundSize: '60px 60px'
+      }} />
+    </div>
   );
 }
 
-function SlideInCard({ children, className = '', direction = 'left', delay = 0 }: { 
-  children: ReactNode; 
-  className?: string;
-  direction?: 'left' | 'right';
-  delay?: number;
-}) {
+// Fade in animation wrapper
+function FadeIn({ children, className = '', delay = 0 }: { children: ReactNode; className?: string; delay?: number }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-50px' });
 
@@ -162,8 +38,8 @@ function SlideInCard({ children, className = '', direction = 'left', delay = 0 }
     <motion.div
       ref={ref}
       className={className}
-      initial={{ opacity: 0, x: direction === 'left' ? -60 : 60 }}
-      animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: direction === 'left' ? -60 : 60 }}
+      initial={{ opacity: 0, y: 30 }}
+      animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.6, delay, ease: [0.25, 0.1, 0.25, 1] }}
     >
       {children}
@@ -171,479 +47,697 @@ function SlideInCard({ children, className = '', direction = 'left', delay = 0 }
   );
 }
 
-// ==================== Icons ====================
+// Modern pill badge
+function Badge({ children, variant = 'default' }: { children: ReactNode; variant?: 'default' | 'success' | 'warning' }) {
+  const colors = {
+    default: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+    success: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    warning: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+  };
 
-function CheckIcon() {
   return (
-    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="20,6 9,17 4,12" />
-    </svg>
+    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${colors[variant]}`}>
+      {children}
+    </span>
   );
 }
 
-function ArrowRightIcon() {
+// Bento card component
+function BentoCard({ children, className = '', hover = true }: { children: ReactNode; className?: string; hover?: boolean }) {
   return (
-    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="5" y1="12" x2="19" y2="12" />
-      <polyline points="12,5 19,12 12,19" />
-    </svg>
+    <motion.div
+      className={`relative bg-white/[0.03] backdrop-blur-sm border border-white/[0.08] rounded-2xl overflow-hidden ${className}`}
+      whileHover={hover ? { scale: 1.02, borderColor: 'rgba(255,255,255,0.15)' } : {}}
+      transition={{ duration: 0.2 }}
+    >
+      {children}
+    </motion.div>
   );
 }
 
-function PenIcon() {
+// Stats counter
+function StatCounter({ value, label, suffix = '' }: { value: string; label: string; suffix?: string }) {
   return (
-    <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 19l7-7 3 3-7 7-3-3z" />
-      <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" />
-      <path d="M2 2l7.586 7.586" />
-      <circle cx="11" cy="11" r="2" />
-    </svg>
+    <div className="text-center">
+      <div className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
+        {value}{suffix}
+      </div>
+      <div className="text-sm text-white/50 mt-1">{label}</div>
+    </div>
   );
 }
 
-function BookIcon() {
+// Feature icon wrapper
+function FeatureIcon({ children, gradient = 'from-blue-500 to-cyan-500' }: { children: ReactNode; gradient?: string }) {
   return (
-    <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-    </svg>
+    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center text-white shadow-lg`}>
+      {children}
+    </div>
   );
 }
 
-function UsersIcon() {
-  return (
-    <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-      <circle cx="9" cy="7" r="4" />
-      <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+// Icons
+const Icons = {
+  Lock: () => (
+    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <rect x="3" y="11" width="18" height="11" rx="2" />
+      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
     </svg>
-  );
-}
-
-function ShieldIcon() {
-  return (
-    <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-    </svg>
-  );
-}
-
-function ZapIcon() {
-  return (
-    <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+  ),
+  Zap: () => (
+    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
       <polygon points="13,2 3,14 12,14 11,22 21,10 12,10 13,2" />
     </svg>
-  );
-}
-
-function GlobeIcon() {
-  return (
-    <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="10" />
-      <line x1="2" y1="12" x2="22" y2="12" />
-      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+  ),
+  Shield: () => (
+    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
     </svg>
-  );
-}
-
-function WalletIcon() {
-  return (
-    <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+  ),
+  Globe: () => (
+    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <circle cx="12" cy="12" r="10" />
+      <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+    </svg>
+  ),
+  Wallet: () => (
+    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
       <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
       <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
       <path d="M18 12a2 2 0 0 0 0 4h4v-4h-4z" />
     </svg>
-  );
-}
+  ),
+  Clock: () => (
+    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <circle cx="12" cy="12" r="10" />
+      <path d="M12 6v6l4 2" />
+    </svg>
+  ),
+  Sparkles: () => (
+    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path d="M12 2L9 12l-7-3 7 3-3 10 3-7 3 7-3-10 7 3-7-3 3-10z" />
+    </svg>
+  ),
+  Code: () => (
+    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path d="M16 18l6-6-6-6M8 6l-6 6 6 6" />
+    </svg>
+  ),
+  Book: () => (
+    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+    </svg>
+  ),
+  ArrowRight: () => (
+    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path d="M5 12h14M12 5l7 7-7 7" />
+    </svg>
+  ),
+  Check: () => (
+    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+      <path d="M20 6L9 17l-5-5" />
+    </svg>
+  ),
+  GitHub: () => (
+    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z" />
+    </svg>
+  ),
+  Twitter: () => (
+    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    </svg>
+  ),
+  Menu: () => (
+    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path d="M4 6h16M4 12h16M4 18h16" />
+    </svg>
+  ),
+  X: () => (
+    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path d="M6 18L18 6M6 6l12 12" />
+    </svg>
+  ),
+};
 
-// ==================== Main Landing Page ====================
+// Navigation
+function Navigation() {
+  const [isOpen, setIsOpen] = useState(false);
 
-export default function LandingPage() {
+  const navItems = [
+    { label: 'Features', href: '#features' },
+    { label: 'How It Works', href: '#how-it-works' },
+    { label: 'Docs', href: '/docs' },
+    { label: 'Marketplace', href: '/marketplace' },
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white overflow-x-hidden">
-      {/* Custom styles for gradient animation */}
-      <style jsx global>{`
-        @keyframes gradient {
-          0%, 100% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-        }
-        .animate-gradient {
-          background-size: 200% 200%;
-          animation: gradient 15s ease infinite;
-        }
-      `}</style>
-
-      {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 px-6 py-4 bg-slate-900/80 backdrop-blur-lg border-b border-white/5">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <Link href="/landing" className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
-              <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
-                <circle cx="16" cy="16" r="14" fill="white" fillOpacity="0.9"/>
-                <path d="M16 24C20.4183 24 24 20.4183 24 16C24 11.5817 20.4183 8 16 8C11.8579 8 8.42516 11.0773 8.03516 15.0875H17.5V16.9125H8.03516C8.42516 20.9227 11.8579 24 16 24Z" fill="#3B82F6"/>
-              </svg>
-            </div>
-            <span className="text-xl font-bold">BasePaywall</span>
-          </Link>
-          <nav className="hidden md:flex items-center gap-8">
-            <a href="#how-it-works" className="text-white/70 hover:text-white transition-colors">Cara Kerja</a>
-            <a href="#for-creators" className="text-white/70 hover:text-white transition-colors">Untuk Kreator</a>
-            <a href="#for-readers" className="text-white/70 hover:text-white transition-colors">Untuk Pembaca</a>
-          </nav>
-          <Link href="/">
-            <motion.button
-              className="px-5 py-2.5 bg-blue-500 hover:bg-blue-600 rounded-lg font-medium transition-colors"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              Masuk App
-            </motion.button>
-          </Link>
-        </div>
-      </header>
-
-      {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center pt-20">
-        {/* Animated Background */}
-        <div className="absolute inset-0 z-0">
-          <AnimatedHero />
-        </div>
-
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-900/50 via-transparent to-slate-900 z-10" />
-
-        {/* Hero Content */}
-        <div className="relative z-20 text-center px-6 max-w-4xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-          >
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-              Sekali Bayar.{' '}
-              <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                Konten Terbuka.
-              </span>
-              <br />Selesai.
-            </h1>
-          </motion.div>
-
-          <motion.p
-            className="text-xl md:text-2xl text-white/70 mb-10 max-w-2xl mx-auto"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-          >
-            Karyamu punya nilai.<br />
-            Buat orang membayarnya dengan cara yang sederhana dan nyaman.
-          </motion.p>
-
-          <motion.div
-            className="flex flex-col sm:flex-row items-center justify-center gap-4"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-          >
-            <Link href="/">
-              <motion.button
-                className="px-8 py-4 rounded-xl font-semibold text-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors"
-                whileHover={{ y: -4, boxShadow: '0 20px 40px -10px rgba(59, 130, 246, 0.5)' }}
-                whileTap={{ y: 0, scale: 0.98 }}
-              >
-                Mulai sebagai Kreator
-              </motion.button>
-            </Link>
-            <a href="#how-it-works">
-              <motion.button
-                className="px-8 py-4 rounded-xl font-semibold text-lg bg-white/10 text-white border border-white/20 hover:bg-white/20 transition-colors"
-                whileHover={{ y: -4 }}
-                whileTap={{ y: 0, scale: 0.98 }}
-              >
-                Lihat Cara Kerja
-              </motion.button>
-            </a>
-          </motion.div>
-        </div>
-
-        {/* Scroll Indicator */}
-        <motion.div 
-          className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.5 }}
-        >
-          <motion.div
-            className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center pt-2"
-            animate={{ y: [0, 10, 0] }}
-            transition={{ repeat: Infinity, duration: 2 }}
-          >
-            <motion.div className="w-1.5 h-1.5 bg-white/60 rounded-full" />
-          </motion.div>
-        </motion.div>
-      </section>
-
-      {/* Problem Statement */}
-      <section className="py-24 px-6">
-        <div className="max-w-4xl mx-auto">
-          <FadeInSection>
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold mb-6">
-                Konten Bagus Tidak Harus Ribet Dijual
-              </h2>
-              <p className="text-lg text-white/60 max-w-2xl mx-auto leading-relaxed">
-                Banyak kreator punya tulisan, materi, dan karya digital yang bernilai.
-                Sayangnya, menjualnya sering kali terasa rumit dan melelahkan.
-              </p>
-            </div>
-          </FadeInSection>
-
-          <FadeInSection delay={0.2}>
-            <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-white/10 rounded-3xl p-8 md:p-12 hover:border-white/20 transition-colors">
-              <p className="text-xl md:text-2xl text-white/80 text-center leading-relaxed">
-                BasePaywall hadir untuk membuat proses itu jauh lebih sederhana.<br />
-                <span className="text-white font-medium">
-                  Tanpa langganan. Tanpa akun panjang. Tanpa sistem yang membingungkan.
-                </span>
-              </p>
-            </div>
-          </FadeInSection>
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section id="how-it-works" className="py-24 px-6 bg-gradient-to-b from-transparent via-blue-900/10 to-transparent">
-        <div className="max-w-6xl mx-auto">
-          <FadeInSection>
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                Cara Kerjanya Sesederhana Ini
-              </h2>
-              <p className="text-lg text-white/60">
-                Tiga langkah sederhana untuk mulai menjual kontenmu
-              </p>
-            </div>
-          </FadeInSection>
-
-          <div className="grid md:grid-cols-3 gap-6 mb-16">
-            {[
-              { step: '1', title: 'Buat Konten', desc: 'Tulis atau upload konten premium yang ingin kamu jual', icon: <PenIcon /> },
-              { step: '2', title: 'Tentukan Harga', desc: 'Atur harga yang sesuai dengan nilai kontenmu', icon: <WalletIcon /> },
-              { step: '3', title: 'Konten Terbuka', desc: 'Pembaca bayar sekali, konten langsung bisa diakses', icon: <ZapIcon /> },
-            ].map((item, i) => (
-              <SlideInCard key={item.step} direction={i % 2 === 0 ? 'left' : 'right'} delay={i * 0.1}>
-                <motion.div 
-                  className="bg-white/5 border border-white/10 rounded-2xl p-8 h-full hover:bg-white/[0.08] hover:border-white/20 transition-all"
-                  whileHover={{ y: -5 }}
-                >
-                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center mb-6 text-white">
-                    {item.icon}
-                  </div>
-                  <div className="text-sm text-blue-400 font-medium mb-2">Langkah {item.step}</div>
-                  <h3 className="text-xl font-bold mb-3">{item.title}</h3>
-                  <p className="text-white/60">{item.desc}</p>
-                </motion.div>
-              </SlideInCard>
-            ))}
-          </div>
-
-          <FadeInSection delay={0.3}>
-            <div className="text-center">
-              <p className="text-lg text-white/70 mb-2">
-                Pembaca cukup membayar satu kali.
-              </p>
-              <p className="text-xl text-white font-medium">
-                Setelah itu, konten langsung bisa diakses kapan saja.
-              </p>
-            </div>
-          </FadeInSection>
-        </div>
-      </section>
-
-      {/* For Creators */}
-      <section id="for-creators" className="py-24 px-6">
-        <div className="max-w-6xl mx-auto">
-          <FadeInSection>
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                Cocok untuk Berbagai Jenis Kreator
-              </h2>
-              <p className="text-lg text-white/60">
-                Jika kamu membuat konten bernilai, BasePaywall membantumu menjualnya
-              </p>
-            </div>
-          </FadeInSection>
-
-          <div className="grid md:grid-cols-2 gap-6 mb-16">
-            {[
-              { title: 'Penulis', desc: 'Artikel dan catatan premium yang layak dibayar', icon: <BookIcon /> },
-              { title: 'Pengajar', desc: 'Materi belajar dan tutorial eksklusif', icon: <UsersIcon /> },
-              { title: 'Kreator Digital', desc: 'Konten digital eksklusif untuk audiensmu', icon: <GlobeIcon /> },
-              { title: 'Komunitas', desc: 'Berbagi konten terbatas dengan anggota', icon: <ShieldIcon /> },
-            ].map((item, i) => (
-              <SlideInCard key={item.title} direction={i % 2 === 0 ? 'left' : 'right'} delay={i * 0.1}>
-                <motion.div 
-                  className="bg-white/5 border border-white/10 rounded-2xl p-6 flex items-start gap-5 hover:bg-white/[0.08] hover:border-white/20 transition-all"
-                  whileHover={{ scale: 1.02 }}
-                >
-                  <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400 shrink-0">
-                    {item.icon}
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-bold mb-1">{item.title}</h3>
-                    <p className="text-white/60">{item.desc}</p>
-                  </div>
-                </motion.div>
-              </SlideInCard>
-            ))}
-          </div>
-
-          {/* Creator Benefits */}
-          <FadeInSection delay={0.2}>
-            <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-white/10 rounded-3xl p-8 md:p-10 hover:border-white/20 transition-colors">
-              <h3 className="text-2xl font-bold mb-6 text-center">Kendali Tetap di Tangan Kreator</h3>
-              <div className="grid md:grid-cols-3 gap-6">
-                {[
-                  'Tentukan harga sendiri',
-                  'Pantau hasil penjualan dengan jelas',
-                  'Karyamu tetap sepenuhnya milikmu',
-                ].map((benefit) => (
-                  <div key={benefit} className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
-                      <CheckIcon />
-                    </div>
-                    <span className="text-white/80">{benefit}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </FadeInSection>
-        </div>
-      </section>
-
-      {/* For Readers */}
-      <section id="for-readers" className="py-24 px-6 bg-gradient-to-b from-transparent via-cyan-900/10 to-transparent">
-        <div className="max-w-6xl mx-auto">
-          <FadeInSection>
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                Nyaman untuk Pembaca
-              </h2>
-              <p className="text-lg text-white/60">
-                Pengalaman yang simpel membuat pembaca tidak ragu untuk membayar
-              </p>
-            </div>
-          </FadeInSection>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[
-              { title: 'Tanpa Akun', desc: 'Tidak perlu membuat akun atau registrasi panjang' },
-              { title: 'Tanpa Langganan', desc: 'Tidak ada biaya bulanan yang mengikat' },
-              { title: 'Bayar Sekali', desc: 'Satu kali bayar, akses selamanya' },
-              { title: 'Multi Perangkat', desc: 'Bisa dibuka dari perangkat apa pun' },
-            ].map((item, i) => (
-              <SlideInCard key={item.title} direction={i < 2 ? 'left' : 'right'} delay={i * 0.1}>
-                <motion.div 
-                  className="bg-white/5 border border-white/10 rounded-2xl p-6 h-full text-center hover:bg-white/[0.08] hover:border-white/20 transition-all"
-                  whileHover={{ y: -5 }}
-                >
-                  <div className="w-10 h-10 rounded-full bg-cyan-500/20 flex items-center justify-center text-cyan-400 mx-auto mb-4">
-                    <CheckIcon />
-                  </div>
-                  <h3 className="text-lg font-bold mb-2">{item.title}</h3>
-                  <p className="text-sm text-white/60">{item.desc}</p>
-                </motion.div>
-              </SlideInCard>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Design Section */}
-      <section className="py-24 px-6">
-        <div className="max-w-4xl mx-auto">
-          <FadeInSection>
-            <div className="bg-gradient-to-br from-indigo-500/10 to-pink-500/10 border border-white/10 rounded-3xl p-8 md:p-12 text-center hover:border-white/20 transition-colors">
-              <h2 className="text-3xl md:text-4xl font-bold mb-6">
-                Tampilan Modern yang Meyakinkan
-              </h2>
-              <p className="text-lg text-white/70 leading-relaxed mb-8">
-                BasePaywall dirancang dengan tampilan bersih dan profesional.<br />
-                Animasi halus dan transisi lembut<br />
-                membuat halaman terasa hidup tanpa berlebihan.
-              </p>
-              <p className="text-xl text-white font-medium">
-                Semua dibuat agar kontenmu terlihat layak untuk dibayar.
-              </p>
-            </div>
-          </FadeInSection>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-24 px-6">
-        <div className="max-w-4xl mx-auto text-center">
-          <FadeInSection>
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              Mulai Jual Kontenmu<br />
-              <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                Hari Ini
-              </span>
-            </h2>
-            <p className="text-xl text-white/60 mb-10">
-              Tidak perlu ribet. Tidak perlu sistem rumit.<br />
-              Fokuslah pada karyamu.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/">
-                <motion.button
-                  className="px-8 py-4 rounded-xl font-semibold text-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors"
-                  whileHover={{ y: -4, boxShadow: '0 20px 40px -10px rgba(59, 130, 246, 0.5)' }}
-                  whileTap={{ y: 0, scale: 0.98 }}
-                >
-                  Mulai sebagai Kreator
-                </motion.button>
-              </Link>
-              <Link href="/">
-                <motion.button
-                  className="flex items-center gap-2 px-6 py-3 text-white/70 hover:text-white transition-colors"
-                  whileHover={{ x: 5 }}
-                >
-                  Pelajari Lebih Lanjut <ArrowRightIcon />
-                </motion.button>
-              </Link>
-            </div>
-          </FadeInSection>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="py-16 px-6 border-t border-white/10">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-3">
+    <header className="fixed top-0 left-0 right-0 z-50">
+      <div className="mx-4 mt-4">
+        <nav className="max-w-6xl mx-auto px-6 py-4 bg-slate-900/80 backdrop-blur-xl border border-white/[0.08] rounded-2xl">
+          <div className="flex items-center justify-between">
+            {/* Logo */}
+            <Link href="/landing" className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
                 <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
                   <circle cx="16" cy="16" r="14" fill="white" fillOpacity="0.9"/>
                   <path d="M16 24C20.4183 24 24 20.4183 24 16C24 11.5817 20.4183 8 16 8C11.8579 8 8.42516 11.0773 8.03516 15.0875H17.5V16.9125H8.03516C8.42516 20.9227 11.8579 24 16 24Z" fill="#3B82F6"/>
                 </svg>
               </div>
-              <span className="text-lg font-bold">BasePaywall</span>
+              <span className="text-xl font-bold text-white">BasePaywall</span>
+            </Link>
+
+            {/* Desktop Nav */}
+            <div className="hidden md:flex items-center gap-8">
+              {navItems.map((item) => (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className="text-white/60 hover:text-white transition-colors text-sm font-medium"
+                >
+                  {item.label}
+                </Link>
+              ))}
             </div>
-            <p className="text-white/40 text-center md:text-left italic">
-              Karya punya nilai. Saatnya dihargai.
+
+            {/* CTA */}
+            <div className="hidden md:flex items-center gap-4">
+              <Link
+                href="https://github.com/bandungresearchai/BasePaywall"
+                target="_blank"
+                className="p-2 text-white/60 hover:text-white transition-colors"
+              >
+                <Icons.GitHub />
+              </Link>
+              <Link href="/">
+                <motion.button
+                  className="px-5 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-medium text-sm transition-colors"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  Launch App
+                </motion.button>
+              </Link>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <button
+              className="md:hidden p-2 text-white/60"
+              onClick={() => setIsOpen(!isOpen)}
+            >
+              {isOpen ? <Icons.X /> : <Icons.Menu />}
+            </button>
+          </div>
+
+          {/* Mobile Menu */}
+          <AnimatePresence>
+            {isOpen && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="md:hidden mt-4 pt-4 border-t border-white/10"
+              >
+                <div className="flex flex-col gap-4">
+                  {navItems.map((item) => (
+                    <Link
+                      key={item.label}
+                      href={item.href}
+                      className="text-white/60 hover:text-white transition-colors py-2"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                  <Link href="/" onClick={() => setIsOpen(false)}>
+                    <button className="w-full px-5 py-3 bg-blue-500 text-white rounded-xl font-medium">
+                      Launch App
+                    </button>
+                  </Link>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </nav>
+      </div>
+    </header>
+  );
+}
+
+// Hero Section
+function HeroSection() {
+  return (
+    <section className="relative min-h-screen flex items-center justify-center pt-32 pb-20 px-6">
+      <GradientOrbs />
+      <GridPattern />
+
+      <div className="relative z-10 max-w-5xl mx-auto text-center">
+        <FadeIn>
+          <Badge>✨ Built on Base L2 • Low Gas Fees</Badge>
+        </FadeIn>
+
+        <FadeIn delay={0.1}>
+          <h1 className="mt-8 text-5xl md:text-7xl lg:text-8xl font-bold leading-[1.1] tracking-tight">
+            <span className="text-white">Monetize Content</span>
+            <br />
+            <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-emerald-400 bg-clip-text text-transparent">
+              One Payment Away
+            </span>
+          </h1>
+        </FadeIn>
+
+        <FadeIn delay={0.2}>
+          <p className="mt-6 text-lg md:text-xl text-white/60 max-w-2xl mx-auto leading-relaxed">
+            The simplest way to sell digital content. No subscriptions, no accounts, no complexity.
+            One payment unlocks permanent access.
+          </p>
+        </FadeIn>
+
+        <FadeIn delay={0.3}>
+          <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link href="/">
+              <motion.button
+                className="px-8 py-4 bg-white text-slate-900 rounded-xl font-semibold text-lg hover:bg-white/90 transition-colors flex items-center gap-2"
+                whileHover={{ scale: 1.02, y: -2 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                Start Creating
+                <Icons.ArrowRight />
+              </motion.button>
+            </Link>
+            <Link href="/docs">
+              <motion.button
+                className="px-8 py-4 bg-white/5 border border-white/10 text-white rounded-xl font-semibold text-lg hover:bg-white/10 transition-colors"
+                whileHover={{ scale: 1.02, y: -2 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                Read Docs
+              </motion.button>
+            </Link>
+          </div>
+        </FadeIn>
+
+        {/* Stats */}
+        <FadeIn delay={0.4}>
+          <div className="mt-20 grid grid-cols-3 gap-8 max-w-lg mx-auto">
+            <StatCounter value="2.5" label="Platform Fee" suffix="%" />
+            <StatCounter value="<$0.01" label="Gas Cost" />
+            <StatCounter value="2s" label="Finality" />
+          </div>
+        </FadeIn>
+      </div>
+
+      {/* Scroll indicator */}
+      <motion.div
+        className="absolute bottom-10 left-1/2 -translate-x-1/2"
+        animate={{ y: [0, 10, 0] }}
+        transition={{ repeat: Infinity, duration: 2 }}
+      >
+        <div className="w-6 h-10 border-2 border-white/20 rounded-full flex justify-center pt-2">
+          <div className="w-1.5 h-1.5 bg-white/40 rounded-full" />
+        </div>
+      </motion.div>
+    </section>
+  );
+}
+
+// Features Bento Grid
+function FeaturesSection() {
+  return (
+    <section id="features" className="py-24 px-6">
+      <div className="max-w-6xl mx-auto">
+        <FadeIn>
+          <div className="text-center mb-16">
+            <Badge variant="success">Features</Badge>
+            <h2 className="mt-4 text-4xl md:text-5xl font-bold text-white">
+              Everything You Need
+            </h2>
+            <p className="mt-4 text-lg text-white/60 max-w-2xl mx-auto">
+              A complete toolkit for content monetization on the blockchain
             </p>
-            <div className="flex items-center gap-6">
-              <a href="https://github.com/bandungresearchai/BasePaywall" target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-white transition-colors">
-                GitHub
-              </a>
-              <a href="https://base.org" target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-white transition-colors">
-                Base
-              </a>
+          </div>
+        </FadeIn>
+
+        {/* Bento Grid */}
+        <div className="grid md:grid-cols-3 gap-4">
+          {/* Large Feature Card */}
+          <FadeIn delay={0.1}>
+            <BentoCard className="md:col-span-2 md:row-span-2 p-8">
+              <div className="h-full flex flex-col">
+                <FeatureIcon gradient="from-blue-500 to-cyan-500">
+                  <Icons.Lock />
+                </FeatureIcon>
+                <h3 className="mt-6 text-2xl font-bold text-white">Permanent Access</h3>
+                <p className="mt-3 text-white/60 flex-grow">
+                  One payment grants lifetime access to content. No recurring fees, no expiration. 
+                  Your purchase is recorded on-chain forever.
+                </p>
+                <div className="mt-8 p-4 bg-white/5 rounded-xl border border-white/10">
+                  <code className="text-sm text-blue-400">
+                    unlockContent(contentId) → hasAccess = true ✓
+                  </code>
+                </div>
+              </div>
+            </BentoCard>
+          </FadeIn>
+
+          {/* Small Feature Cards */}
+          <FadeIn delay={0.2}>
+            <BentoCard className="p-6">
+              <FeatureIcon gradient="from-purple-500 to-pink-500">
+                <Icons.Zap />
+              </FeatureIcon>
+              <h3 className="mt-4 text-lg font-bold text-white">Instant Settlement</h3>
+              <p className="mt-2 text-sm text-white/60">
+                Payments go directly to creators. No delays, no holdbacks.
+              </p>
+            </BentoCard>
+          </FadeIn>
+
+          <FadeIn delay={0.3}>
+            <BentoCard className="p-6">
+              <FeatureIcon gradient="from-amber-500 to-orange-500">
+                <Icons.Shield />
+              </FeatureIcon>
+              <h3 className="mt-4 text-lg font-bold text-white">No Chargebacks</h3>
+              <p className="mt-2 text-sm text-white/60">
+                Blockchain payments are final. Protect your revenue.
+              </p>
+            </BentoCard>
+          </FadeIn>
+
+          {/* Time Limited Access */}
+          <FadeIn delay={0.4}>
+            <BentoCard className="p-6">
+              <FeatureIcon gradient="from-emerald-500 to-teal-500">
+                <Icons.Clock />
+              </FeatureIcon>
+              <h3 className="mt-4 text-lg font-bold text-white">Time-Limited Access</h3>
+              <p className="mt-2 text-sm text-white/60">
+                Offer rental periods with V3 contracts. Perfect for time-sensitive content.
+              </p>
+              <div className="mt-3">
+                <Badge variant="success">New in V3</Badge>
+              </div>
+            </BentoCard>
+          </FadeIn>
+
+          {/* NFT Access */}
+          <FadeIn delay={0.5}>
+            <BentoCard className="p-6">
+              <FeatureIcon gradient="from-indigo-500 to-violet-500">
+                <Icons.Sparkles />
+              </FeatureIcon>
+              <h3 className="mt-4 text-lg font-bold text-white">NFT Access Tokens</h3>
+              <p className="mt-2 text-sm text-white/60">
+                Transferable access passes with V4. Trade or gift your access.
+              </p>
+              <div className="mt-3">
+                <Badge variant="warning">Coming Soon</Badge>
+              </div>
+            </BentoCard>
+          </FadeIn>
+
+          {/* API Access */}
+          <FadeIn delay={0.6}>
+            <BentoCard className="p-6">
+              <FeatureIcon gradient="from-rose-500 to-red-500">
+                <Icons.Code />
+              </FeatureIcon>
+              <h3 className="mt-4 text-lg font-bold text-white">x402 Protocol</h3>
+              <p className="mt-2 text-sm text-white/60">
+                HTTP 402 Payment Required. Monetize APIs with native web payments.
+              </p>
+            </BentoCard>
+          </FadeIn>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// How It Works
+function HowItWorksSection() {
+  const steps = [
+    {
+      step: '01',
+      title: 'Create Content',
+      description: 'Upload your premium content and set your price in ETH. Takes less than 2 minutes.',
+      icon: <Icons.Book />,
+    },
+    {
+      step: '02',
+      title: 'Share Your Link',
+      description: 'Get a unique link for your content. Share it anywhere - social media, newsletters, websites.',
+      icon: <Icons.Globe />,
+    },
+    {
+      step: '03',
+      title: 'Get Paid Instantly',
+      description: 'When readers pay, funds go directly to your wallet. No intermediaries, no delays.',
+      icon: <Icons.Wallet />,
+    },
+  ];
+
+  return (
+    <section id="how-it-works" className="py-24 px-6 relative">
+      <div className="absolute inset-0 bg-gradient-to-b from-blue-500/5 via-transparent to-transparent" />
+      
+      <div className="max-w-6xl mx-auto relative z-10">
+        <FadeIn>
+          <div className="text-center mb-16">
+            <Badge>How It Works</Badge>
+            <h2 className="mt-4 text-4xl md:text-5xl font-bold text-white">
+              Simple as 1-2-3
+            </h2>
+          </div>
+        </FadeIn>
+
+        <div className="grid md:grid-cols-3 gap-8">
+          {steps.map((item, i) => (
+            <FadeIn key={item.step} delay={i * 0.1}>
+              <div className="relative">
+                {/* Connector line */}
+                {i < steps.length - 1 && (
+                  <div className="hidden md:block absolute top-12 left-[60%] w-[80%] h-px bg-gradient-to-r from-white/20 to-transparent" />
+                )}
+                
+                <BentoCard className="p-8 text-center">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-blue-500/30 text-blue-400 mb-6">
+                    {item.icon}
+                  </div>
+                  <div className="text-sm font-mono text-blue-400 mb-2">Step {item.step}</div>
+                  <h3 className="text-xl font-bold text-white mb-3">{item.title}</h3>
+                  <p className="text-white/60">{item.description}</p>
+                </BentoCard>
+              </div>
+            </FadeIn>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// Comparison Section
+function ComparisonSection() {
+  return (
+    <section className="py-24 px-6">
+      <div className="max-w-4xl mx-auto">
+        <FadeIn>
+          <div className="text-center mb-16">
+            <Badge variant="warning">Why BasePaywall?</Badge>
+            <h2 className="mt-4 text-4xl md:text-5xl font-bold text-white">
+              Traditional vs Web3
+            </h2>
+          </div>
+        </FadeIn>
+
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Traditional */}
+          <FadeIn delay={0.1}>
+            <BentoCard className="p-8 opacity-60">
+              <h3 className="text-xl font-bold text-white/80 mb-6">Traditional Platforms</h3>
+              <ul className="space-y-4">
+                {[
+                  '10-30% platform fees',
+                  'Weekly/monthly payouts',
+                  'Account required for readers',
+                  'Chargeback risks',
+                  'Platform can shut you down',
+                ].map((item) => (
+                  <li key={item} className="flex items-center gap-3 text-white/50">
+                    <span className="w-5 h-5 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center text-xs">✗</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </BentoCard>
+          </FadeIn>
+
+          {/* BasePaywall */}
+          <FadeIn delay={0.2}>
+            <BentoCard className="p-8 border-blue-500/30">
+              <h3 className="text-xl font-bold text-white mb-6">BasePaywall</h3>
+              <ul className="space-y-4">
+                {[
+                  '2.5% platform fee only',
+                  'Instant settlement',
+                  'No account needed - just wallet',
+                  'No chargebacks ever',
+                  'Decentralized & censorship-resistant',
+                ].map((item) => (
+                  <li key={item} className="flex items-center gap-3 text-white/80">
+                    <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                      <Icons.Check />
+                    </span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </BentoCard>
+          </FadeIn>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// CTA Section
+function CTASection() {
+  return (
+    <section className="py-24 px-6">
+      <div className="max-w-4xl mx-auto">
+        <FadeIn>
+          <BentoCard className="p-12 md:p-16 text-center relative overflow-hidden" hover={false}>
+            {/* Background decoration */}
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-purple-500/10" />
+            <div className="absolute -top-20 -right-20 w-40 h-40 bg-blue-500/20 rounded-full blur-3xl" />
+            <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-purple-500/20 rounded-full blur-3xl" />
+
+            <div className="relative z-10">
+              <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+                Start Monetizing Today
+              </h2>
+              <p className="text-lg text-white/60 mb-10 max-w-xl mx-auto">
+                Join creators who are already earning with BasePaywall.
+                No setup fees, no commitments.
+              </p>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Link href="/">
+                  <motion.button
+                    className="px-8 py-4 bg-white text-slate-900 rounded-xl font-semibold text-lg hover:bg-white/90 transition-colors flex items-center gap-2"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    Launch App
+                    <Icons.ArrowRight />
+                  </motion.button>
+                </Link>
+                <Link href="/docs">
+                  <motion.button
+                    className="px-8 py-4 text-white/60 hover:text-white transition-colors flex items-center gap-2"
+                    whileHover={{ x: 5 }}
+                  >
+                    Read Documentation
+                    <Icons.ArrowRight />
+                  </motion.button>
+                </Link>
+              </div>
             </div>
+          </BentoCard>
+        </FadeIn>
+      </div>
+    </section>
+  );
+}
+
+// Footer
+function Footer() {
+  return (
+    <footer className="py-16 px-6 border-t border-white/[0.08]">
+      <div className="max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-4 gap-8 mb-12">
+          {/* Logo & Description */}
+          <div className="md:col-span-2">
+            <Link href="/landing" className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+                <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
+                  <circle cx="16" cy="16" r="14" fill="white" fillOpacity="0.9"/>
+                  <path d="M16 24C20.4183 24 24 20.4183 24 16C24 11.5817 20.4183 8 16 8C11.8579 8 8.42516 11.0773 8.03516 15.0875H17.5V16.9125H8.03516C8.42516 20.9227 11.8579 24 16 24Z" fill="#3B82F6"/>
+                </svg>
+              </div>
+              <span className="text-xl font-bold text-white">BasePaywall</span>
+            </Link>
+            <p className="text-white/50 max-w-sm">
+              Decentralized content monetization on Base L2. 
+              Simple, transparent, and creator-first.
+            </p>
+          </div>
+
+          {/* Links */}
+          <div>
+            <h4 className="font-semibold text-white mb-4">Product</h4>
+            <ul className="space-y-3">
+              {['Features', 'Marketplace', 'Pricing', 'Docs'].map((item) => (
+                <li key={item}>
+                  <Link href={item === 'Docs' ? '/docs' : item === 'Marketplace' ? '/marketplace' : `#${item.toLowerCase()}`} className="text-white/50 hover:text-white transition-colors">
+                    {item}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-semibold text-white mb-4">Resources</h4>
+            <ul className="space-y-3">
+              {[
+                { label: 'GitHub', href: 'https://github.com/bandungresearchai/BasePaywall' },
+                { label: 'Base Network', href: 'https://base.org' },
+                { label: 'Smart Contracts', href: '/docs#contracts' },
+              ].map((item) => (
+                <li key={item.label}>
+                  <Link href={item.href} className="text-white/50 hover:text-white transition-colors" target={item.href.startsWith('http') ? '_blank' : undefined}>
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
-      </footer>
+
+        {/* Bottom */}
+        <div className="pt-8 border-t border-white/[0.08] flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-white/40 text-sm">
+            © 2026 BasePaywall. Built with ❤️ on Base.
+          </p>
+          <div className="flex items-center gap-4">
+            <Link href="https://github.com/bandungresearchai/BasePaywall" target="_blank" className="text-white/40 hover:text-white transition-colors">
+              <Icons.GitHub />
+            </Link>
+            <Link href="https://twitter.com/basepaywall" target="_blank" className="text-white/40 hover:text-white transition-colors">
+              <Icons.Twitter />
+            </Link>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+// Main Landing Page
+export default function LandingPage() {
+  return (
+    <div className="min-h-screen bg-slate-950 text-white overflow-x-hidden">
+      <Navigation />
+      <HeroSection />
+      <FeaturesSection />
+      <HowItWorksSection />
+      <ComparisonSection />
+      <CTASection />
+      <Footer />
     </div>
   );
 }
