@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
-import { WalletConnect } from '@/components/WalletConnect';
+import { useState, useMemo } from 'react';
+import { WalletOnlyConnect } from '@/components/WalletOnlyConnect';
 import { NetworkGuard } from '@/components/NetworkGuard';
-import { ProductCard } from '@/components/ProductCard';
+import { BentoGrid, BentoSearchBar, FeatureGrid } from '@/components/BentoUI';
 import { useAccount } from 'wagmi';
 import { useNextContentId, usePlatformStats, useUserUnlocks } from '@/hooks/usePaywallV2';
 import Link from 'next/link';
@@ -151,7 +151,7 @@ function StatsBanner() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   PRODUCT GRID
+   PRODUCT GRID (Using Bento UI)
 ═══════════════════════════════════════════════════════════════════════════ */
 
 interface ProductGridProps {
@@ -177,13 +177,7 @@ function ProductGrid({ contentIds, onPurchase }: ProductGridProps) {
     );
   }
 
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      {contentIds.map((contentId) => (
-        <ProductCard key={contentId.toString()} contentId={contentId} onPurchase={onPurchase} />
-      ))}
-    </div>
-  );
+  return <BentoGrid contentIds={contentIds} onPurchase={onPurchase} />;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -210,13 +204,11 @@ function MyPurchases() {
       </button>
 
       {isOpen && (
-        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="mt-4">
           {isLoading ? (
-            <div className="col-span-full text-center py-8 text-gray-400">Loading...</div>
+            <div className="text-center py-8 text-gray-400">Loading...</div>
           ) : (
-            contentIds.map((contentId) => (
-              <ProductCard key={contentId.toString()} contentId={contentId} />
-            ))
+            <BentoGrid contentIds={contentIds} />
           )}
         </div>
       )}
@@ -297,7 +289,7 @@ export default function MarketplacePage() {
                   <span>Sell Products</span>
                 </Link>
                 <NetworkBadge />
-                <WalletConnect />
+                <WalletOnlyConnect />
               </div>
             </div>
           </div>
@@ -342,7 +334,7 @@ export default function MarketplacePage() {
                 Connect your wallet to purchase products
               </p>
               <div className="flex justify-center">
-                <WalletConnect />
+                <WalletOnlyConnect />
               </div>
             </div>
           )}

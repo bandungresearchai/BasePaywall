@@ -1,15 +1,16 @@
 'use client';
 
-import { WalletConnect } from '@/components/WalletConnect';
+import { WalletOnlyConnect } from '@/components/WalletOnlyConnect';
 import { PaywallContentV2 } from '@/components/PaywallContentV2';
 import { NetworkGuard } from '@/components/NetworkGuard';
 import { CreatorDashboardV2 } from '@/components/CreatorDashboardV2';
 import { UserUnlockedContentV2 } from '@/components/UserUnlockedContentV2';
-import { PlatformAdminV2 } from '@/components/PlatformAdminV2';
-import { X402IDRXDemo } from '@/components/X402IDRXDemo';
+import { EnhancedPlatformAdmin } from '@/components/EnhancedPlatformAdmin';
+import { X402ContentDemo } from '@/components/X402Demo';
+import { BentoGrid, ShowcaseGallery, FeatureGrid, BentoSearchBar } from '@/components/BentoUI';
 import { useAccount } from 'wagmi';
 import { usePlatformStats, useCreator, useNextContentId } from '@/hooks/usePaywallV2';
-import { useState, useEffect, createContext, useContext, useCallback } from 'react';
+import { useState, useEffect, createContext, useContext, useCallback, useMemo } from 'react';
 
 /* ═══════════════════════════════════════════════════════════════════════════
    THEME CONTEXT - Dark/Light Mode
@@ -1103,10 +1104,10 @@ function ContentBrowser({ showSearch = false }: { showSearch?: boolean }) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   IDRX SECTION - Indonesian Rupiah Stablecoin Integration
+   X402 SECTION - HTTP 402 Payment Required with ETH
 ═══════════════════════════════════════════════════════════════════════════ */
 
-function IDRXSection() {
+function X402Section() {
   const { theme } = useTheme();
 
   return (
@@ -1115,29 +1116,24 @@ function IDRXSection() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <div className="relative">
-              <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-red-700 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-sm">IDR</span>
-              </div>
-              <div className="absolute -bottom-1 -right-1 bg-blue-500 rounded-full w-5 h-5 flex items-center justify-center border-2 border-[#0a0a0f]">
-                <span className="text-white text-[8px] font-bold">X</span>
-              </div>
+            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center">
+              <span className="text-white font-bold text-lg">402</span>
             </div>
             <div>
               <h2 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                IDRX + x402 Protocol
+                x402 Protocol
               </h2>
               <p className={theme === 'dark' ? 'text-white/40' : 'text-gray-500'}>
-                Bayar dengan Rupiah Digital di Blockchain
+                HTTP 402 Payment Required on Base
               </p>
             </div>
           </div>
         </div>
         <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs ${
-          theme === 'dark' ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-red-50 text-red-600 border border-red-200'
+          theme === 'dark' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' : 'bg-blue-50 text-blue-600 border border-blue-200'
         }`}>
-          <span className="text-sm">🇮🇩</span>
-          Indonesia Ready
+          <span className="text-sm">⚡</span>
+          Pay with ETH
         </div>
       </div>
 
@@ -1147,11 +1143,11 @@ function IDRXSection() {
           theme === 'dark' ? 'bg-white/[0.03] border border-white/[0.06]' : 'bg-white border border-gray-200 shadow-sm'
         }`}>
           <div className="flex items-center gap-2 mb-3">
-            <span className="text-2xl">💱</span>
-            <span className={`text-xs ${theme === 'dark' ? 'text-white/40' : 'text-gray-500'}`}>Stablecoin</span>
+            <span className="text-2xl">💰</span>
+            <span className={`text-xs ${theme === 'dark' ? 'text-white/40' : 'text-gray-500'}`}>Payment</span>
           </div>
-          <p className={`text-lg font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>1 IDRX = Rp 1</p>
-          <p className="text-xs text-emerald-400 mt-1">Backed 1:1 by Rupiah</p>
+          <p className={`text-lg font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Native ETH</p>
+          <p className="text-xs text-emerald-400 mt-1">Low fees on Base L2</p>
         </div>
 
         <div className={`rounded-2xl p-5 ${
@@ -1162,7 +1158,7 @@ function IDRXSection() {
             <span className={`text-xs ${theme === 'dark' ? 'text-white/40' : 'text-gray-500'}`}>Protocol</span>
           </div>
           <p className={`text-lg font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>HTTP 402</p>
-          <p className="text-xs text-blue-400 mt-1">x402 Payment Required</p>
+          <p className="text-xs text-blue-400 mt-1">Payment Required</p>
         </div>
 
         <div className={`rounded-2xl p-5 ${
@@ -1173,29 +1169,29 @@ function IDRXSection() {
             <span className={`text-xs ${theme === 'dark' ? 'text-white/40' : 'text-gray-500'}`}>Network</span>
           </div>
           <p className={`text-lg font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Base L2</p>
-          <p className="text-xs text-purple-400 mt-1">Fast & low fees</p>
+          <p className="text-xs text-purple-400 mt-1">Ethereum security</p>
         </div>
       </div>
 
-      {/* About IDRX */}
+      {/* About x402 */}
       <div className={`rounded-2xl p-6 ${
         theme === 'dark' 
-          ? 'bg-gradient-to-br from-red-900/20 to-orange-900/10 border border-red-500/20' 
-          : 'bg-gradient-to-br from-red-50 to-orange-50 border border-red-200'
+          ? 'bg-gradient-to-br from-purple-900/20 to-blue-900/10 border border-purple-500/20' 
+          : 'bg-gradient-to-br from-purple-50 to-blue-50 border border-purple-200'
       }`}>
         <div className="flex flex-col md:flex-row gap-6">
           <div className="flex-1">
             <h3 className={`text-lg font-semibold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-              Tentang IDRX
+              About x402 Protocol
             </h3>
             <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-white/60' : 'text-gray-600'}`}>
-              IDRX adalah stablecoin transparan yang didukung oleh Rupiah, dirancang untuk mendukung 
-              aplikasi onchain yang stabil, intuitif, dan siap untuk Indonesia. IDRX mengurangi volatilitas 
-              dan menghilangkan hambatan dalam memberikan pengalaman dunia nyata yang kohesif bagi pengguna.
+              The x402 protocol implements HTTP 402 "Payment Required" for web monetization. 
+              When an API returns 402, clients can automatically pay with ETH to unlock access.
+              This enables seamless pay-per-access APIs without traditional payment infrastructure.
             </p>
             <div className="flex flex-wrap gap-2">
               <a 
-                href="https://docs.idrx.co/api/getting-started" 
+                href="https://docs.base.org" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
@@ -1204,10 +1200,10 @@ function IDRXSection() {
                     : 'bg-white hover:bg-gray-50 text-gray-700 hover:text-gray-900 border border-gray-200'
                 }`}
               >
-                <span>📖</span> Documentation
+                <span>📖</span> Base Docs
               </a>
               <a 
-                href="https://idrx.co" 
+                href="https://github.com/bandungresearchai/BasePaywall" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
@@ -1216,24 +1212,24 @@ function IDRXSection() {
                     : 'bg-white hover:bg-gray-50 text-gray-700 hover:text-gray-900 border border-gray-200'
                 }`}
               >
-                <span>🌐</span> Website
+                <span>🔗</span> GitHub
               </a>
             </div>
           </div>
           <div className={`md:w-48 p-4 rounded-xl ${theme === 'dark' ? 'bg-white/[0.03]' : 'bg-white'}`}>
-            <p className={`text-xs mb-2 ${theme === 'dark' ? 'text-white/40' : 'text-gray-500'}`}>Keunggulan IDRX</p>
+            <p className={`text-xs mb-2 ${theme === 'dark' ? 'text-white/40' : 'text-gray-500'}`}>x402 Features</p>
             <ul className={`text-xs space-y-2 ${theme === 'dark' ? 'text-white/60' : 'text-gray-600'}`}>
               <li className="flex items-center gap-2">
-                <span className="text-emerald-400">✓</span> Transparan
+                <span className="text-emerald-400">✓</span> Native ETH payments
               </li>
               <li className="flex items-center gap-2">
-                <span className="text-emerald-400">✓</span> Stabil
+                <span className="text-emerald-400">✓</span> Automatic verification
               </li>
               <li className="flex items-center gap-2">
-                <span className="text-emerald-400">✓</span> Indonesia-ready
+                <span className="text-emerald-400">✓</span> On-chain proof
               </li>
               <li className="flex items-center gap-2">
-                <span className="text-emerald-400">✓</span> Low volatility
+                <span className="text-emerald-400">✓</span> One-time access
               </li>
             </ul>
           </div>
@@ -1243,9 +1239,9 @@ function IDRXSection() {
       {/* Demo Component */}
       <div>
         <h3 className={`text-lg font-semibold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-          Demo: Bayar Konten dengan IDRX
+          Demo: Pay for API Content with ETH
         </h3>
-        <X402IDRXDemo />
+        <X402ContentDemo />
       </div>
 
       {/* Integration Guide */}
@@ -1253,7 +1249,7 @@ function IDRXSection() {
         theme === 'dark' ? 'bg-white/[0.03] border border-white/[0.06]' : 'bg-white border border-gray-200 shadow-sm'
       }`}>
         <h3 className={`text-lg font-semibold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-          Integrasi x402 + IDRX
+          x402 Integration
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className={`p-4 rounded-xl ${theme === 'dark' ? 'bg-white/[0.02]' : 'bg-gray-50'}`}>
@@ -1261,10 +1257,10 @@ function IDRXSection() {
               1. API Endpoint
             </p>
             <code className={`text-xs font-mono ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`}>
-              GET /api/x402-idrx/content
+              GET /api/x402/content
             </code>
             <p className={`text-xs mt-2 ${theme === 'dark' ? 'text-white/40' : 'text-gray-500'}`}>
-              Returns 402 with IDRX payment details
+              Returns 402 with payment details
             </p>
           </div>
           <div className={`p-4 rounded-xl ${theme === 'dark' ? 'bg-white/[0.02]' : 'bg-gray-50'}`}>
@@ -1272,8 +1268,8 @@ function IDRXSection() {
               2. Payment Flow
             </p>
             <div className={`text-xs space-y-1 ${theme === 'dark' ? 'text-white/40' : 'text-gray-500'}`}>
-              <p>• Approve IDRX spending</p>
-              <p>• Transfer IDRX to payTo</p>
+              <p>• Receive 402 + payment info</p>
+              <p>• Send ETH to payTo address</p>
               <p>• Verify on-chain payment</p>
             </div>
           </div>
@@ -1282,19 +1278,19 @@ function IDRXSection() {
               3. Response Headers
             </p>
             <div className={`text-xs font-mono space-y-0.5 ${theme === 'dark' ? 'text-emerald-400' : 'text-emerald-600'}`}>
-              <p>X-Payment-Asset: IDRX</p>
-              <p>X-Payment-TokenAddress: 0x...</p>
+              <p>X-Payment-Required: true</p>
+              <p>X-Payment-Amount: 0.001 ETH</p>
             </div>
           </div>
           <div className={`p-4 rounded-xl ${theme === 'dark' ? 'bg-white/[0.02]' : 'bg-gray-50'}`}>
             <p className={`text-xs font-medium mb-2 ${theme === 'dark' ? 'text-white/60' : 'text-gray-700'}`}>
-              4. Harga Demo
+              4. Demo Price
             </p>
             <p className={`text-lg font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-              Rp 15.000
+              0.001 ETH
             </p>
             <p className={`text-xs ${theme === 'dark' ? 'text-white/40' : 'text-gray-500'}`}>
-              ≈ 15,000 IDRX
+              ≈ $2.50 USD
             </p>
           </div>
         </div>
@@ -1304,10 +1300,93 @@ function IDRXSection() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   DISCOVER SECTION - Bento UI Product Grid
+═══════════════════════════════════════════════════════════════════════════ */
+
+function DiscoverSection() {
+  const { theme } = useTheme();
+  const { nextContentId } = useNextContentId();
+  const [searchQuery, setSearchQuery] = useState('');
+  
+  // Generate all content IDs
+  const allContentIds = useMemo(() => {
+    const ids: bigint[] = [];
+    for (let i = 1; i < nextContentId; i++) {
+      ids.push(BigInt(i));
+    }
+    return ids.reverse(); // Newest first
+  }, [nextContentId]);
+
+  // Filter based on search (by ID for now)
+  const filteredIds = useMemo(() => {
+    if (!searchQuery) return allContentIds;
+    const query = searchQuery.toLowerCase();
+    return allContentIds.filter(id => id.toString().includes(query));
+  }, [allContentIds, searchQuery]);
+
+  return (
+    <section className="space-y-8">
+      {/* Header */}
+      <div className="text-center">
+        <h2 className={`text-3xl md:text-4xl font-bold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+          Discover Products
+        </h2>
+        <p className={`text-lg max-w-2xl mx-auto ${theme === 'dark' ? 'text-white/50' : 'text-gray-500'}`}>
+          Browse premium digital products from creators. Pay once with ETH for permanent access.
+        </p>
+      </div>
+
+      {/* Search Bar */}
+      <BentoSearchBar 
+        value={searchQuery} 
+        onChange={setSearchQuery}
+        placeholder="Search by product ID..."
+      />
+
+      {/* Stats Row */}
+      <div className="grid grid-cols-3 gap-4 max-w-xl mx-auto">
+        <div className={`rounded-2xl p-4 text-center ${
+          theme === 'dark' ? 'bg-white/[0.03] border border-white/[0.06]' : 'bg-white border border-gray-200'
+        }`}>
+          <p className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+            {allContentIds.length}
+          </p>
+          <p className={`text-xs ${theme === 'dark' ? 'text-white/40' : 'text-gray-500'}`}>Products</p>
+        </div>
+        <div className={`rounded-2xl p-4 text-center ${
+          theme === 'dark' ? 'bg-white/[0.03] border border-white/[0.06]' : 'bg-white border border-gray-200'
+        }`}>
+          <p className={`text-2xl font-bold text-blue-400`}>Base</p>
+          <p className={`text-xs ${theme === 'dark' ? 'text-white/40' : 'text-gray-500'}`}>Network</p>
+        </div>
+        <div className={`rounded-2xl p-4 text-center ${
+          theme === 'dark' ? 'bg-white/[0.03] border border-white/[0.06]' : 'bg-white border border-gray-200'
+        }`}>
+          <p className={`text-2xl font-bold text-emerald-400`}>ETH</p>
+          <p className={`text-xs ${theme === 'dark' ? 'text-white/40' : 'text-gray-500'}`}>Payment</p>
+        </div>
+      </div>
+
+      {/* Bento Grid */}
+      <BentoGrid contentIds={filteredIds} />
+
+      {/* Feature Grid */}
+      <FeatureGrid />
+
+      {/* Showcase */}
+      <ShowcaseGallery 
+        title="Featured Categories" 
+        subtitle="Explore top product categories"
+      />
+    </section>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
    NAVIGATION
 ═══════════════════════════════════════════════════════════════════════════ */
 
-type AppView = 'home' | 'discover' | 'creator' | 'unlocked' | 'admin' | 'analytics' | 'idrx';
+type AppView = 'home' | 'discover' | 'creator' | 'unlocked' | 'admin' | 'analytics' | 'x402';
 
 interface NavItem {
   key: AppView;
@@ -1321,7 +1400,7 @@ const navItems: NavItem[] = [
   { key: 'discover', label: 'Discover', icon: '🔍', description: 'Browse content' },
   { key: 'creator', label: 'Create', icon: '✨', description: 'Creator dashboard' },
   { key: 'unlocked', label: 'Library', icon: '📚', description: 'Your unlocks' },
-  { key: 'idrx', label: 'IDRX', icon: '🇮🇩', description: 'Pay with Rupiah' },
+  { key: 'x402', label: 'x402', icon: '⚡', description: 'HTTP 402 payments' },
   { key: 'admin', label: 'Admin', icon: '⚙️', description: 'Platform settings' },
   { key: 'analytics', label: 'Analytics', icon: '📊', description: 'View insights' },
 ];
@@ -1699,7 +1778,7 @@ function HomeContent() {
             <WalletAddress />
             <NotificationBell />
             <ThemeToggle />
-            <WalletConnect />
+            <WalletOnlyConnect />
           </div>
         </div>
       </header>
@@ -1794,13 +1873,7 @@ function HomeContent() {
             )}
 
             {activeView === 'discover' && (
-              <section className="space-y-6">
-                <div>
-                  <h2 className={`text-2xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Discover Content</h2>
-                  <p className={theme === 'dark' ? 'text-white/40' : 'text-gray-500'}>Browse and unlock premium content from creators</p>
-                </div>
-                <ContentBrowser showSearch />
-              </section>
+              <DiscoverSection />
             )}
 
             {activeView === 'creator' && (
@@ -1811,7 +1884,7 @@ function HomeContent() {
 
             {activeView === 'admin' && (
               <section>
-                <PlatformAdminV2 />
+                <EnhancedPlatformAdmin />
               </section>
             )}
 
@@ -1825,8 +1898,8 @@ function HomeContent() {
               <AnalyticsDashboard />
             )}
 
-            {activeView === 'idrx' && (
-              <IDRXSection />
+            {activeView === 'x402' && (
+              <X402Section />
             )}
           </div>
         </div>
