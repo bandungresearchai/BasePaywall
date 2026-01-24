@@ -310,18 +310,21 @@ See [**EXTENSIBILITY.md**](./docs/EXTENSIBILITY.md) for the full roadmap and tec
 
 | Version | Feature | Status |
 |---------|---------|--------|
-| v2.1 | Time-Limited Access | 🟡 Q1 2026 |
-| v2.2 | NFT Access Tokens | 🟡 Q2 2026 |
-| v2.2 | USDC Payments | 🟡 Q2 2026 |
-| v2.3 | Tiered Content & Bundles | 🟠 Q3 2026 |
-| v3.0 | Subscription Model | 🔴 Q4 2026 |
-| v3.1 | Content Encryption | 🔴 Q4 2026 |
+| v5.0 | Tiered Content & Bundles | 🟠 Q2 2026 |
+| v5.1 | USDC Payments | 🟠 Q2 2026 |
+| v6.0 | Subscription Model | 🔴 Q3 2026 |
+| v6.1 | Content Encryption | 🔴 Q4 2026 |
 
 ### Already Implemented
 - ✅ Multi-tenant creator platform (V2)
-- ✅ IDRX stablecoin support
-- ✅ x402 protocol middleware
+- ✅ x402 protocol middleware (ETH-based payments)
 - ✅ Creator dashboards & analytics
+- ✅ Wallet-only authentication (Coinbase, MetaMask, WalletConnect)
+- ✅ Bento UI product grid with responsive CSS Grid
+- ✅ Toast notification system with error handling
+- ✅ Loading skeletons and empty states
+- ✅ **Time-Limited Access (V3)** - Rental model with configurable durations
+- ✅ **NFT Access Tokens (V4)** - ERC721 transferable access with royalties
 
 ## 🤝 Contributing
 

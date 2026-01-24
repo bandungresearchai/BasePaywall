@@ -25,13 +25,36 @@ BasePaywall is designed as a foundational layer for Web3 content monetization. W
 - ✅ Content enable/disable controls
 - ✅ Emergency pause functionality
 
+### v2.0.1 - UI/UX Improvements (January 2026)
+- ✅ Wallet-only authentication (removed social login)
+- ✅ Bento UI product grid with CSS Grid Layout
+- ✅ Enhanced admin dashboard with charts & analytics
+- ✅ Toast notification system with error handling
+- ✅ Loading skeletons and empty states
+- ✅ Mobile-friendly WalletConnect support
+
+### v3.0 - Time-Limited Access (January 2026)
+- ✅ Configurable access duration per content
+- ✅ Support for 1 hour to 365 days rental periods
+- ✅ Access extension/renewal functionality
+- ✅ Expiration tracking and time remaining display
+- ✅ Backwards compatible with permanent access
+
+### v4.0 - NFT Access Tokens (January 2026)
+- ✅ ERC721 tokens minted on purchase
+- ✅ Transferable access via NFT transfer
+- ✅ EIP-2981 royalty support for secondary sales
+- ✅ Configurable max supply per content
+- ✅ Custom metadata URI per content
+- ✅ OpenSea and marketplace compatible
+
 ---
 
-## 🚀 Planned Extensions
+## 🚀 Future Extensions
 
-### 1. Time-Limited Access (v2.1)
+### 1. Tiered Content & Bundles (v5.0)
 
-**Status:** 🟡 Planned for Q1 2026
+**Status:** 🟠 Under Design - Q2 2026
 
 **Concept:**
 Instead of permanent access, allow creators to offer time-bounded unlocks.

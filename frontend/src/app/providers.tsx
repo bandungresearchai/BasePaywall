@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { WagmiProvider, useAccount, useSwitchChain } from 'wagmi';
 import { OnchainKitProvider } from '@coinbase/onchainkit';
 import { wagmiConfig, defaultChain, isSupportedChain } from '@/config/wagmi';
+import { ToastProvider } from '@/components/ui/Toast';
 
 // Create query client outside component to prevent recreation
 const queryClient = new QueryClient({
@@ -73,7 +74,9 @@ export function Providers({ children }: { children: ReactNode }) {
           apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}
           chain={defaultChain}
         >
-          <NetworkGuard>{children}</NetworkGuard>
+          <ToastProvider>
+            <NetworkGuard>{children}</NetworkGuard>
+          </ToastProvider>
         </OnchainKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
