@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { usePlatformOwner, usePlatformStats, usePlatformFee, usePlatformWithdraw } from '@/hooks/usePaywallV2';
 import { useExplorer } from '@/hooks/useNetwork';
-import { useAccount } from 'wagmi';
 
 function LoadingSpinner({ size = 20 }: { size?: number }) {
   return (

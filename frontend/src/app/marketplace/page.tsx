@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { WalletOnlyConnect } from '@/components/WalletOnlyConnect';
 import { NetworkGuard } from '@/components/NetworkGuard';
-import { BentoGrid, BentoSearchBar, FeatureGrid } from '@/components/BentoUI';
+import { BentoGrid } from '@/components/BentoUI';
 import { useAccount } from 'wagmi';
 import { useNextContentId, usePlatformStats, useUserUnlocks } from '@/hooks/usePaywallV2';
 import Link from 'next/link';
@@ -242,7 +242,7 @@ export default function MarketplacePage() {
   // For now, show all products (filtering will be enhanced later)
   // In production, you'd filter based on metadata from IPFS
   const filteredContentIds = useMemo(() => {
-    let ids = [...allContentIds];
+    const ids = [...allContentIds];
     
     // Sort
     if (sort === 'oldest') {

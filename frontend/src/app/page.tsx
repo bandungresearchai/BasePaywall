@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { WalletOnlyConnect } from '@/components/WalletOnlyConnect';
 import { PaywallContentV2 } from '@/components/PaywallContentV2';
 import { NetworkGuard } from '@/components/NetworkGuard';
@@ -12,6 +13,28 @@ import { BentoGrid, ShowcaseGallery, FeatureGrid, BentoSearchBar } from '@/compo
 import { useAccount } from 'wagmi';
 import { usePlatformStats, useCreator, useNextContentId } from '@/hooks/usePaywallV2';
 import { useState, useEffect, createContext, useContext, useCallback, useMemo } from 'react';
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   REDIRECT CHECK - Show Landing Page First
+═══════════════════════════════════════════════════════════════════════════ */
+
+function useLandingRedirect() {
+  const router = useRouter();
+  const [shouldShowApp, setShouldShowApp] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  useEffect(() => {
+    const hasSeenLanding = localStorage.getItem('hasSeenLanding');
+    if (!hasSeenLanding) {
+      router.push('/landing');
+    } else {
+      setShouldShowApp(true);
+    }
+    setIsLoading(false);
+  }, [router]);
+  
+  return { shouldShowApp, isLoading };
+}
 
 /* ═══════════════════════════════════════════════════════════════════════════
    THEME CONTEXT - Dark/Light Mode
@@ -1186,7 +1209,7 @@ function X402Section() {
               About x402 Protocol
             </h3>
             <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-white/60' : 'text-gray-600'}`}>
-              The x402 protocol implements HTTP 402 "Payment Required" for web monetization. 
+              The x402 protocol implements HTTP 402 &quot;Payment Required&quot; for web monetization. 
               When an API returns 402, clients can automatically pay with ETH to unlock access.
               This enables seamless pay-per-access APIs without traditional payment infrastructure.
             </p>
@@ -1409,7 +1432,7 @@ const navItems: NavItem[] = [
 function Sidebar({ active, onChange }: { active: AppView; onChange: (v: AppView) => void }) {
   const { theme } = useTheme();
   return (
-    <aside className="space-y-2 hidden lg:block">
+    <aside className={`space-y-2 ${theme === 'dark' ? 'bg-[#0d0d14]/80' : 'bg-white/80'} backdrop-blur-sm rounded-2xl p-2 border ${theme === 'dark' ? 'border-white/[0.06]' : 'border-gray-200'}`}>
       {/* Navigation */}
       <nav className="space-y-1 px-2 pt-2">
         {navItems.map((item) => (
@@ -1850,7 +1873,7 @@ function HomeContent() {
       <div className="relative max-w-7xl mx-auto px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
           {/* Sidebar */}
-          <div className="lg:col-span-1">
+          <div className="hidden lg:block lg:col-span-1">
             <div className="lg:sticky lg:top-24">
               <Sidebar active={activeView} onChange={setActiveView} />
             </div>
@@ -2000,15 +2023,48 @@ function HomeContent() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   LOADING SCREEN
+═══════════════════════════════════════════════════════════════════════════ */
+
+function LoadingScreen() {
+  return (
+    <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
+      <div className="flex flex-col items-center gap-4">
+        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center animate-pulse">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" stroke="white" strokeWidth="2" fill="none" />
+          </svg>
+        </div>
+        <p className="text-white/40 text-sm">Loading...</p>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
    EXPORT - Wrap with Providers
 ═══════════════════════════════════════════════════════════════════════════ */
+
+function HomeWrapper() {
+  const { shouldShowApp, isLoading } = useLandingRedirect();
+  
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+  
+  if (!shouldShowApp) {
+    return <LoadingScreen />;
+  }
+  
+  return <HomeContent />;
+}
 
 export default function Home() {
   return (
     <ThemeProvider>
       <NotificationProvider>
         <ToastProvider>
-          <HomeContent />
+          <HomeWrapper />
         </ToastProvider>
       </NotificationProvider>
     </ThemeProvider>

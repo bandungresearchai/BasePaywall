@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useContent, useUnlockContent, useContentAccess, useNextContentId } from '@/hooks/usePaywallV2';
 import { getProductLocal, getIPFSUrl, type ProductMetadata } from '@/lib/ipfs';
 import { useAccount } from 'wagmi';
@@ -351,6 +351,7 @@ export function ShowcaseGallery({
   subtitle = "Featured products on BasePaywall",
   items 
 }: ShowcaseGalleryProps) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { nextContentId } = useNextContentId();
   
   // Generate showcase from real products or use defaults

@@ -24,8 +24,9 @@ export const privyConfig: PrivyClientConfig = {
 
   // Embedded wallet configuration
   embeddedWallets: {
-    createOnLogin: 'users-without-wallets', // Auto-create for email/social login users
-    requireUserPasswordOnCreate: false,
+    ethereum: {
+      createOnLogin: 'users-without-wallets', // Auto-create for email/social login users
+    },
   },
 
   // Legal links (optional)

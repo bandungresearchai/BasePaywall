@@ -10,7 +10,6 @@ import {
   useUpdateContent,
   useCreatorWithdraw,
   usePlatformFee,
-  useNextContentId,
 } from '@/hooks/usePaywallV2';
 import { useExplorer } from '@/hooks/useNetwork';
 import { useAccount } from 'wagmi';
@@ -195,7 +194,7 @@ function RegistrationSection() {
         <p className="text-red-400 text-sm mt-2 text-center">{error}</p>
       )}
       {isSuccess && (
-        <p className="text-green-400 text-sm mt-2 text-center">✅ You're now a verified seller!</p>
+        <p className="text-green-400 text-sm mt-2 text-center">✅ You&apos;re now a verified seller!</p>
       )}
     </div>
   );
@@ -225,7 +224,9 @@ function CreateContentForm() {
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [productUrl, setProductUrl] = useState('');
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [thumbnailUrl, setThumbnailUrl] = useState('');
   
   const { createContent, isPending, isConfirming, isSuccess, hash, error } = useCreateContent();

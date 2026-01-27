@@ -375,7 +375,7 @@ function CreateNFTCollection() {
         <div className="p-4 bg-violet-500/10 border border-violet-500/20 rounded-xl">
           <p className="text-sm text-violet-300">
             <strong>Note:</strong> NFTs can be traded on OpenSea and other marketplaces. 
-            You'll receive {royalty}% royalty on all secondary sales.
+            You&apos;ll receive {royalty}% royalty on all secondary sales.
           </p>
         </div>
 
@@ -400,7 +400,7 @@ function CreateNFTCollection() {
 
 // Main page
 export default function V4Page() {
-  const { isConnected } = useAccount();
+  useAccount();
   const [activeTab, setActiveTab] = useState<'browse' | 'my-nfts' | 'create'>('browse');
 
   return (

@@ -266,9 +266,8 @@ export function PrivyStyleWalletConnect() {
   const { address, isConnected } = useAccount();
   const { disconnect } = useDisconnect();
   const { chainName, chainId } = useNetwork();
-  const { baseSepolia } = require('wagmi/chains');
   
-  const isTestnet = chainId === baseSepolia.id;
+  const isTestnet = chainId === 84532; // Base Sepolia chainId
 
   const formatAddress = (addr: string) => `${addr.slice(0, 6)}...${addr.slice(-4)}`;
 

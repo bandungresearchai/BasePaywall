@@ -101,6 +101,7 @@ export function useNotifiedTransaction<T extends (...args: unknown[]) => void>(
     reset?: () => void;
   }
 ) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const toast = useToast();
   
   useTxNotification({

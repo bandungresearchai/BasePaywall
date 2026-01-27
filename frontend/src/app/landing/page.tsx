@@ -1,10 +1,53 @@
 'use client';
 
-import { useRef, ReactNode, useState } from 'react';
+import { useRef, ReactNode, useState, useCallback } from 'react';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 // ==================== Modern Landing Page 2026 ====================
+
+// Custom hook & component for app launch that saves the flag
+function useAppLaunch() {
+  const router = useRouter();
+  
+  const launchApp = useCallback((callback?: () => void) => {
+    localStorage.setItem('hasSeenLanding', 'true');
+    if (callback) callback();
+    router.push('/');
+  }, [router]);
+  
+  return launchApp;
+}
+
+// Button component for launching app
+function LaunchAppButton({ children, className, variant = 'primary', onClick }: { 
+  children: ReactNode; 
+  className?: string;
+  variant?: 'primary' | 'secondary' | 'text' | 'mobile';
+  onClick?: () => void;
+}) {
+  const launchApp = useAppLaunch();
+  
+  const baseStyles = variant === 'primary' 
+    ? 'px-8 py-4 bg-white text-slate-900 rounded-xl font-semibold text-lg hover:bg-white/90 transition-colors flex items-center gap-2'
+    : variant === 'secondary'
+    ? 'px-5 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-medium text-sm transition-colors'
+    : variant === 'mobile'
+    ? 'w-full px-5 py-3 bg-blue-500 text-white rounded-xl font-medium'
+    : 'px-8 py-4 text-white/60 hover:text-white transition-colors flex items-center gap-2';
+  
+  return (
+    <motion.button
+      className={className || baseStyles}
+      onClick={() => launchApp(onClick)}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+    >
+      {children}
+    </motion.button>
+  );
+}
 
 // Animated gradient orbs background
 function GradientOrbs() {
@@ -230,15 +273,9 @@ function Navigation() {
               >
                 <Icons.GitHub />
               </Link>
-              <Link href="/">
-                <motion.button
-                  className="px-5 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-medium text-sm transition-colors"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  Launch App
-                </motion.button>
-              </Link>
+              <LaunchAppButton variant="secondary">
+                Launch App
+              </LaunchAppButton>
             </div>
 
             {/* Mobile Menu Button */}
@@ -270,11 +307,9 @@ function Navigation() {
                       {item.label}
                     </Link>
                   ))}
-                  <Link href="/" onClick={() => setIsOpen(false)}>
-                    <button className="w-full px-5 py-3 bg-blue-500 text-white rounded-xl font-medium">
-                      Launch App
-                    </button>
-                  </Link>
+                  <LaunchAppButton variant="mobile" onClick={() => setIsOpen(false)}>
+                    Launch App
+                  </LaunchAppButton>
                 </div>
               </motion.div>
             )}
@@ -316,16 +351,10 @@ function HeroSection() {
 
         <FadeIn delay={0.3}>
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/">
-              <motion.button
-                className="px-8 py-4 bg-white text-slate-900 rounded-xl font-semibold text-lg hover:bg-white/90 transition-colors flex items-center gap-2"
-                whileHover={{ scale: 1.02, y: -2 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                Start Creating
-                <Icons.ArrowRight />
-              </motion.button>
-            </Link>
+            <LaunchAppButton variant="primary">
+              Start Creating
+              <Icons.ArrowRight />
+            </LaunchAppButton>
             <Link href="/docs">
               <motion.button
                 className="px-8 py-4 bg-white/5 border border-white/10 text-white rounded-xl font-semibold text-lg hover:bg-white/10 transition-colors"
@@ -625,16 +654,10 @@ function CTASection() {
                 No setup fees, no commitments.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Link href="/">
-                  <motion.button
-                    className="px-8 py-4 bg-white text-slate-900 rounded-xl font-semibold text-lg hover:bg-white/90 transition-colors flex items-center gap-2"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    Launch App
-                    <Icons.ArrowRight />
-                  </motion.button>
-                </Link>
+                <LaunchAppButton variant="primary">
+                  Launch App
+                  <Icons.ArrowRight />
+                </LaunchAppButton>
                 <Link href="/docs">
                   <motion.button
                     className="px-8 py-4 text-white/60 hover:text-white transition-colors flex items-center gap-2"

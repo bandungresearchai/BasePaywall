@@ -6,7 +6,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { WalletOnlyConnect } from '@/components/WalletOnlyConnect';
 import { NetworkGuard } from '@/components/NetworkGuard';
-import { formatEther, parseEther } from 'viem';
 
 // ==================== V3 Time-Limited Access Page ====================
 
@@ -311,7 +310,7 @@ function CreateTimeLimitedContent() {
 
 // Main page
 export default function V3Page() {
-  const { isConnected } = useAccount();
+  useAccount();
   const [activeTab, setActiveTab] = useState<'browse' | 'create'>('browse');
 
   return (
